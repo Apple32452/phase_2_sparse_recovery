@@ -1,0 +1,621 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{array}
+\usepackage{multirow}
+
+\definecolor{darkgreen}{rgb}{0.0, 0.45, 0.1}
+\definecolor{darkred}{rgb}{0.7, 0.0, 0.0}
+\definecolor{darkorange}{rgb}{0.8, 0.4, 0.0}
+\definecolor{darkblue}{rgb}{0.0, 0.2, 0.6}
+
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\Y}{\mathbf{Y}}
+
+\title{\textbf{Research Strategy Summary}\\[0.3em]
+\large From Compressed Attention Theory to\\
+Operator-Family-Aware Sparse Recovery\\[0.5em]
+\normalsize \textit{Consolidating current results, candidate directions,\\
+and recommended research path}}
+\author{Internal Research Note}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Starting Point: The Compressed Attention Theorem}
+\label{sec:theorem}
+% ============================================================
+
+The theoretical foundation is a proof that self-attention approximately
+commutes with sensing operators satisfying the Restricted Isometry
+Property (RIP).
+
+\subsection{Statement}
+
+Let $\X \in \mathbb{R}^{n \times d}$ have $s$-sparse rows, and let
+$\A \in \mathbb{R}^{m \times n}$ satisfy RIP of order $2s$ with
+constant $\delta \in (0,1)$. Define $\Y = \A\X$. Then:
+\begin{equation}
+\left\| \mathrm{Attention}(\Y)
+      - \A \cdot \mathrm{Attention}(\X) \right\|_F
+= \mathcal{O}(\delta).
+\label{eq:commutation}
+\end{equation}
+
+\subsection{Key ingredients}
+
+The error decomposes into two terms:
+\begin{equation}
+\|\Delta_{\mathrm{error}}\|_F
+\;\leq\;
+\underbrace{\frac{\delta\sqrt{1+\delta}}{\sqrt{d_k}}}_{\text{softmax perturbation}}
+\;+\;
+\underbrace{2\|\Delta\|_2 \sqrt{1+\delta}}_{\text{commutator } [S, \A]},
+\end{equation}
+where $S = \mathrm{softmax}(\X\X^\top / \sqrt{d_k})$ and
+$\Delta = S - I$.
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Softmax perturbation:} RIP preserves the Gram matrix
+    $\X\X^\top$ up to $\mathcal{O}(\delta)$, so the attention weights
+    computed from $\Y$ approximate those from $\X$.
+    \item \textbf{Commutator error:} Moving $\A$ outside
+    $\mathrm{softmax}(\cdot)\A\X$ introduces an error controlled by
+    the commutator $[S, \A]$, which is small when $S \approx I$
+    (i.e., when $\sqrt{d_k}$ is large relative to the Gram entries).
+    \item \textbf{Orthogonal special case:} When $\A^\top\A = I$,
+    both terms vanish and the commutation is exact:
+    $\mathrm{Attention}(\Y) = \A \cdot \mathrm{Attention}(\X)$.
+\end{itemize}
+
+\subsection{Interpretation}
+
+The theorem says that the \emph{attention pattern}---the relational
+structure captured by self-attention---is approximately
+operator-invariant for RIP sensing matrices acting on sparse signals.
+This is a geometric property: attention depends on inner products,
+and RIP preserves inner products on sparse vectors.
+
+% ============================================================
+\section{Current Experimental Results}
+\label{sec:results}
+% ============================================================
+
+Extensive experiments on synthetic sparse recovery
+($n = 256$, $m = 128$, $k = 25$, Fourier $\to$ Gaussian transfer)
+have produced one strong positive result and a set of informative
+negatives.
+
+\subsection{The positive result}
+
+\begin{mdframed}
+\textbf{Zero-shot support-aware decomposition (naive top-$k$+LS on ISTA
+iterates) outperforms zero-shot LISTA on Fourier $\to$ Gaussian transfer.}
+\begin{equation}
+\text{NRMSE:}\quad
+\text{Naive top-}k\text{+LS} = 0.257
+\quad\text{vs.}\quad
+\text{LISTA zero-shot} = 0.327.
+\end{equation}
+This requires zero learned parameters. The decomposition pipeline
+transfers by construction because the ISTA iterate is always computed
+on the target operator at inference time.
+\end{mdframed}
+
+\subsection{The negatives (consistent across all conditions)}
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Learned detectors tie naive top-$k$:}
+    Both the coordinate-wise MLP (4,737 params) and the
+    Support-Aware Transformer with BCE loss (20,259 params)
+    match naive magnitude ranking within $\pm 0.001$ NRMSE
+    across all operating points and training conditions.
+    Root cause: all detector features are magnitude-derived,
+    leaving no orthogonal information.
+
+    \item \textbf{Frozen support $\equiv$ full fine-tune:}
+    Freezing the SAT support gate $(W_u, W_v)$ produces
+    results within $0.001$ NRMSE of full fine-tuning at every
+    budget. The support gate does not carry transferable structure
+    absent from content parameters.
+
+    \item \textbf{SAT end-to-end overfits the source operator:}
+    The MSE-trained SAT achieves zero-shot Gaussian NRMSE of $0.729$,
+    worse than raw ISTA ($0.447$), demonstrating catastrophic
+    operator-specific overfitting.
+
+    \item \textbf{LISTA catches up with 50 samples:}
+    With only 50 target-domain samples, LISTA (60 parameters) matches
+    the zero-shot decomposition baseline. The zero-shot advantage
+    is real but narrow.
+\end{enumerate}
+
+\subsection{Unified diagnosis}
+
+All negatives share a single root cause: \textbf{learned components
+that see only $\x^{(T)}$ (the ISTA iterate) cannot separate sparse
+structure from source-operator iterate statistics.}
+The iterate $\x^{(T)}$ is a highly nonlinear, operator-specific
+function of $\A$.
+Any attention pattern learned from Fourier iterates encodes
+Fourier-specific statistics, not universal sparse structure.
+LISTA succeeds because it takes $(\A, \y)$ as inputs---it is
+operator-aware by construction.
+
+% ============================================================
+\section{Three Candidate Research Directions}
+\label{sec:options}
+% ============================================================
+
+\subsection{Option 1: Compressed-domain attention as architectural
+primitive}
+
+\paragraph{Thesis.}
+Transformers can operate natively on compressed measurements
+$\Y = \A\X$ with bounded approximation error, enabling
+inference without reconstruction.
+
+\paragraph{Strengths.}
+Theoretically clean; the commutation theorem
+(\S\ref{sec:theorem}) directly supports the claim.
+Broad applicability story (compressed classification,
+compressed generation, compressed sequence modeling).
+
+\paragraph{Weaknesses.}
+The ``so what'' problem: if attention on $\Y$ approximates
+$\A \cdot \mathrm{Attention}(\X)$, why not decompress first?
+The answer must be computational, and no compelling
+computational advantage has been identified.
+Recent compressed-domain inference work has largely concluded
+that compressed processing is most useful when reconstruction
+is not the goal.
+
+\paragraph{Ceiling.}
+Modest ICLR paper or strong workshop. Limited by the
+difficulty of demonstrating practical advantage over
+decompression.
+
+\paragraph{Estimated probability at ICLR/NeurIPS:} 15--25\%.
+
+\subsection{Option 2: Operator-conditioned attention for inverse
+problems}
+
+\paragraph{Thesis.}
+Attention conditioned on the sensing operator $\A$ (or its
+Gram matrix $\A^\top\A$) is the right inductive bias for
+learned inverse problem solvers, subsuming the LISTA family.
+
+\paragraph{Strengths.}
+Directly addresses the diagnosed failure mode
+(\S\ref{sec:results}): the model gets operator awareness.
+Concrete empirical program (beat LISTA/ALISTA on transfer).
+Scales to real inverse problems (MRI, CT).
+
+\paragraph{Weaknesses.}
+Positioned as a direct competitor to LISTA---must beat strong,
+well-tuned baselines on their own benchmarks.
+Large architecture design space (cross-attention on rows of
+$\A$, $\A^\top\A$ as positional bias, hypernetwork conditioning).
+The theoretical contribution (commutator bound) motivates
+operator conditioning but does not uniquely specify
+\emph{how} to condition.
+
+\paragraph{Ceiling.}
+Strong ICLR/NeurIPS paper if LISTA-family methods are clearly
+beaten on cross-operator transfer.
+
+\paragraph{Estimated probability at ICLR/NeurIPS:} 30--45\%.
+
+\subsection{Option 3: Support-aware attention via tightened RIP bound}
+
+\paragraph{Thesis.}
+Masking attention to the estimated support is theoretically
+motivated (tightens the commutator bound when $\A$ restricted
+to $k$ columns is near-isometric) and empirically superior
+to unmasked attention for sparse recovery.
+
+\paragraph{Strengths.}
+Tightest theory-to-architecture connection.
+Small parameter count, fast iteration.
+Direct extension of the Asilomar paper.
+
+\paragraph{Weaknesses.}
+Narrow scope (sparse recovery only).
+Current results suggest the gain from cross-coordinate
+attention is small ($0.0012$ NRMSE at $T=10$).
+Masking attention to an estimate that is already close to
+naive top-$k$ is unlikely to change the picture qualitatively.
+
+\paragraph{Ceiling.}
+Clean AISTATS or mid-tier ICLR paper. Limited by the
+likely small empirical gain.
+
+\paragraph{Estimated probability at ICLR/NeurIPS:} 10--20\%.
+
+% ============================================================
+\section{Recommended Direction: Geometric-Family-Aware Attention}
+\label{sec:recommended}
+% ============================================================
+
+\subsection{Reframing the question}
+
+After evaluating Options 1--3, the most natural and promising
+direction is a reframing of Option 2:
+
+\begin{mdframed}
+\textbf{Core question:}
+Can attention be made operator-aware in a way that exploits
+\emph{structured sensing geometry} for sparse inverse recovery,
+while generalizing across a family of operators sharing
+geometric properties?
+\end{mdframed}
+
+This differs from Option 2 (operator conditioning in general)
+in a critical way: instead of conditioning on a \emph{specific}
+$\A$ at inference time (LISTA-style), the method learns to
+exploit geometric structure \emph{shared across a family} of
+operators. Transfer is within the family, not across arbitrary
+operators.
+
+\subsection{Why this framing is more natural}
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{The theorem supports it directly.}
+    The commutation bound (\S\ref{sec:theorem}) is a statement
+    about geometric properties (RIP, inner product preservation),
+    not about specific operator conditioning.
+    It tells us \emph{which operator families} should admit
+    attention-based transfer.
+
+    \item \textbf{It differentiates from LISTA naturally.}
+    LISTA conditions on a specific $(\A, \y)$ pair.
+    This method conditions on geometric structure shared
+    across a family.
+    The comparison becomes scientifically informative
+    (family-level vs.\ instance-level conditioning) rather than
+    a head-to-head benchmark.
+
+    \item \textbf{It generates clean experimental predictions.}
+    Intra-family transfer (e.g., partial Fourier with different
+    sampling masks) should work well.
+    Cross-family transfer (Fourier $\to$ Gaussian) should be
+    harder. The boundary between these regimes is the
+    scientifically interesting finding.
+
+    \item \textbf{Real applications have exactly this structure.}
+    See \S\ref{sec:applications}.
+\end{enumerate}
+
+\subsection{Real-world applications}
+\label{sec:applications}
+
+The ``operator family'' framing is not hypothetical---several
+important application domains have precisely this structure.
+
+\paragraph{Accelerated MRI.}
+The sensing operator is always partial Fourier, but the
+specific sampling mask changes with acquisition protocol:
+different acceleration factors ($4\times$, $8\times$, $12\times$),
+different patterns (Cartesian, radial, spiral, Poisson disc),
+different coil configurations.
+Current learned reconstruction methods are trained per-mask;
+a method that transfers across masks within the Fourier family
+without retraining addresses a genuine deployment bottleneck.
+
+\paragraph{Computational imaging.}
+Structured illumination microscopy, single-pixel cameras, and
+coded aperture systems use sensing matrices (Hadamard, random
+binary, DMD-based) that change with hardware configuration.
+An attention-based method transferring across configurations
+within the same optical family would be directly useful.
+
+\paragraph{Radio interferometry.}
+Telescopes like ALMA and VLA produce partial Fourier
+measurements with array-configuration-dependent sampling
+patterns (uv-coverage). Different observations produce
+different operators, all within the partial Fourier family.
+
+\subsection{Why the ceiling is higher than Options 1--3}
+
+\paragraph{The problem is real and unsolved.}
+Cross-protocol transfer in learned inverse problems is a
+genuine bottleneck. Hospitals maintain multiple trained models
+for different MRI acquisition protocols.
+No existing method cleanly solves intra-family transfer.
+
+\paragraph{The angle is distinctive.}
+``Attention respects geometric structure of operator families''
+is a novel claim that nobody has demonstrated or framed cleanly.
+The theoretical proof provides structural justification,
+not just heuristic motivation.
+
+\paragraph{Partial success is still publishable.}
+If intra-family transfer works on synthetic data but MRI
+results are inconclusive, the paper is still a solid AISTATS
+or workshop contribution.
+If MRI works, the paper is strong ICLR/NeurIPS material.
+
+% ============================================================
+\section{Publication Strategy}
+\label{sec:publication}
+% ============================================================
+
+\subsection{Asilomar submission (near-term, $\sim$5 pages)}
+
+\textbf{Scope:} The current diagnostic result.
+
+\textbf{Central claim:} Zero-shot support-aware decomposition
+(ISTA + top-$k$ + LS) outperforms zero-shot LISTA on
+cross-operator transfer. Learned support detectors do not
+improve on naive magnitude ranking because their inputs
+encode operator-specific iterate statistics.
+
+\textbf{What to include:}
+\begin{itemize}[leftmargin=2em]
+    \item ISTA front-end diagnostic and oracle analysis
+    \item Naive top-$k$+LS vs.\ LISTA zero-shot comparison
+    \item CoordMLP and SAT-BCE negative results with diagnosis
+    \item Robustness sweep across $(m/n, k)$ and a third operator
+    type (to be run)
+    \item Small-sample fine-tuning crossover (0, 10, 25, 50 samples)
+\end{itemize}
+
+\textbf{What to exclude:}
+SAT-E2E results (different contribution, save for A* paper).
+
+\textbf{Estimated acceptance probability:} 70--80\%.
+
+\subsection{A* venue submission (ICLR/ICML/NeurIPS)}
+
+\textbf{Scope:} Geometric-family-aware attention for inverse
+problems (\S\ref{sec:recommended}).
+
+\textbf{Central claim:} Attention conditioned on shared geometric
+structure enables zero-shot transfer within operator families,
+with theoretical grounding via the commutation bound.
+
+\textbf{Experimental program (three tiers):}
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Tier 1 -- Synthetic validation (weeks 1--3):}
+    Partial Fourier with 5--10 different random sampling masks,
+    same $(n, m, k)$. Train on masks 1--5, test zero-shot on
+    masks 6--10. Compare against per-mask LISTA.
+    \textit{This is the de-risking experiment: if intra-family
+    transfer fails here, the thesis is dead.}
+
+    \item \textbf{Tier 2 -- Semi-realistic validation (months 1--3):}
+    Accelerated MRI on fastMRI dataset. Train on Cartesian $4\times$
+    masks, test on Cartesian $8\times$ and radial $4\times$.
+    \textit{This is where the paper goes from ``interesting'' to
+    ``useful.''}
+
+    \item \textbf{Tier 3 -- Cross-family boundary (month 2--4):}
+    Fourier $\to$ Gaussian, Fourier $\to$ Bernoulli, etc.
+    Expected result: cross-family transfer is harder---this maps
+    the boundary of when geometric structure enables transfer.
+\end{enumerate}
+
+\textbf{Estimated probability at ICLR/NeurIPS:}
+\begin{itemize}[leftmargin=2em]
+    \item Full success (intra-family + MRI + theory): 15--20\%
+    probability, strong paper (possible oral).
+    \item Partial success (intra-family synthetic + partial MRI):
+    25--30\% probability, solid poster.
+    \item Informative negative (publishable at AISTATS/workshop):
+    30--35\% probability.
+    \item Inconclusive / execution failure: 15--20\% probability.
+\end{itemize}
+
+Overall probability of a publishable outcome: $\sim$85\%.
+
+% ============================================================
+\section{Immediate Next Steps}
+\label{sec:next}
+% ============================================================
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Asilomar robustness sweep} (1--2 days):
+    Run the existing pipeline across $(m/n) \in \{0.3, 0.5, 0.7\}$,
+    $k \in \{10, 25, 50\}$, and one additional operator type
+    (Bernoulli $\pm 1$ or subsampled Hadamard).
+    Validates whether the zero-shot decomposition advantage
+    generalizes beyond the single Fourier $\to$ Gaussian point.
+
+    \item \textbf{Tier 1 de-risking experiment} (1--2 weeks):
+    Partial Fourier with multiple random masks.
+    Train attention-based reconstructor on mask subset,
+    test zero-shot on held-out masks.
+    This is the single most informative experiment for the A*
+    direction.
+
+    \item \textbf{Formalize ``geometric family''} (concurrent):
+    Define precisely what makes two operators belong to the
+    same family. Candidates: shared basis (all partial Fourier),
+    shared group invariance, shared RIP structure on the same
+    signal class. The definition must be tight enough that the
+    theoretical claim has content.
+
+    \item \textbf{Architecture design} (after Tier 1 results):
+    If Tier 1 validates the thesis, select 2 operator-conditioning
+    mechanisms ($\A^\top\A$ as positional bias vs.\ cross-attention
+    on rows of $\A$) and compare on synthetic setup before
+    scaling to MRI.
+\end{enumerate}
+
+% ============================================================
+\section{Risk Assessment}
+\label{sec:risk}
+% ============================================================
+
+\begin{table}[h]
+\centering
+\caption{Key risks and mitigations for the A* research direction.}
+\vspace{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{4cm}
+                >{\raggedright\arraybackslash}p{3cm}
+                >{\raggedright\arraybackslash}p{5cm}}
+\toprule
+\textbf{Risk} & \textbf{Severity} & \textbf{Mitigation} \\
+\midrule
+Intra-family transfer doesn't work on synthetic data &
+\textcolor{darkred}{High} &
+Detected early by Tier 1 (weeks 1--3). Pivot to Asilomar-only
+scope with minimal time lost. \\[6pt]
+
+LISTA with 50 target samples matches family-aware attention &
+\textcolor{darkorange}{Medium} &
+Focus on regimes where target data is genuinely scarce
+(1--5 samples) or where operator changes continuously
+(real-time adaptive MRI). \\[6pt]
+
+Architecture design space is too large &
+\textcolor{darkorange}{Medium} &
+Commit to 2 mechanisms maximum. Let Tier 1 results guide
+selection before scaling. \\[6pt]
+
+MRI experiments are inconclusive &
+\textcolor{darkorange}{Medium} &
+Synthetic results + theory still support AISTATS-level
+submission. MRI strengthens but is not required. \\[6pt]
+
+Theoretical contribution is viewed as incremental &
+\textcolor{darkorange}{Medium} &
+Strengthen by formalizing geometric family definition and
+proving tighter bounds for structured operator classes
+(e.g., partial Fourier). \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{Summary}
+\label{sec:summary}
+% ============================================================
+
+The project has converged on a correct diagnosis of why current
+learned methods fail at cross-operator transfer: they encode
+operator-specific iterate statistics rather than
+operator-invariant sparse structure.
+This diagnosis, combined with the theoretical result that attention
+approximately commutes with RIP operators, motivates a specific
+research direction: \textbf{attention that exploits geometric
+structure shared within operator families}.
+
+The recommended strategy is:
+\begin{enumerate}[leftmargin=2em]
+    \item Write the Asilomar paper around the existing diagnostic
+    result (high acceptance probability, $\sim$70--80\%).
+    \item De-risk the A* direction with Tier 1 synthetic
+    experiments within 2--3 weeks.
+    \item If Tier 1 validates, invest in architecture design and
+    MRI experiments for an ICLR/NeurIPS submission.
+    \item If Tier 1 fails, the Asilomar paper stands on its own,
+    and the negative informs future work.
+\end{enumerate}
+
+The overall research portfolio has $\sim$85\% probability of
+producing at least one publishable outcome, with $\sim$50\%
+probability of a venue at AISTATS level or above.
+
+
+
+\section{Family Define}
+\subsection{Problem formulation: operator families, transfer regimes, and family diversity}
+
+Let the inverse problem be
+\begin{equation}
+    y = A x + \varepsilon,
+\end{equation}
+where \(x \in \mathbb{R}^n\) is the unknown signal, \(y \in \mathbb{R}^m\) is the measurement, and \(A \in \mathbb{R}^{m \times n}\) is the sensing operator. In this work, we distinguish between \emph{operator instances}, \emph{operator families}, and the \emph{diversity} of a family.
+
+\paragraph{Operator instance.}
+An operator instance is a specific sensing matrix \(A\), such as one particular partial Fourier mask, one Gaussian matrix draw, or one specific subsampled Hadamard pattern.
+
+\paragraph{Operator family.}
+An operator family is a set of sensing operators that share a common generative structure or geometric mechanism. This shared structure may arise from a common transform basis, symmetry class, sampling rule, or Gram-matrix geometry. Representative examples include:
+\begin{itemize}
+    \item \textbf{Partial Fourier family:} operators obtained by selecting different subsets of Fourier coefficients, possibly at different acceleration factors or with different variable-density profiles;
+    \item \textbf{Gaussian family:} i.i.d.\ random matrices sampled from a common distribution;
+    \item \textbf{Hadamard family:} subsampled Hadamard operators with different row subsets;
+    \item \textbf{Circulant or convolutional family:} operators generated from a shared convolutional form with varying kernels.
+\end{itemize}
+
+This distinction is important because realistic inverse problems rarely involve one fixed operator. Instead, they typically involve structured families of related operators.
+
+\paragraph{Within-family transfer.}
+Within-family transfer studies generalization across unseen operator instances from the same family. Let
+\[
+\mathcal{F} = \{A_\theta : \theta \in \Theta\}
+\]
+be an operator family parameterized by \(\theta\). We train a reconstruction model on a subset of instances
+\[
+\mathcal{F}_{\mathrm{train}} \subset \mathcal{F}
+\]
+and evaluate it on held-out instances
+\[
+\mathcal{F}_{\mathrm{test}} \subset \mathcal{F}, \qquad
+\mathcal{F}_{\mathrm{train}} \cap \mathcal{F}_{\mathrm{test}} = \emptyset.
+\]
+The goal is to determine whether the model can exploit the shared structure of the family to generalize to unseen operators without retraining from scratch.
+
+Examples of within-family transfer include:
+\begin{itemize}
+    \item partial Fourier mask \(\rightarrow\) different partial Fourier mask;
+    \item acceleration factor \(m=128 \rightarrow m=64\) within the same partial Fourier acquisition family;
+    \item one variable-density sampling profile \(\rightarrow\) another profile from the same acquisition class.
+\end{itemize}
+
+This is the natural notion of transfer for applications such as MRI, where the forward model remains Fourier-based but the sampling pattern changes.
+
+\paragraph{Cross-family transfer.}
+Cross-family transfer studies generalization across fundamentally different operator classes. One trains on operators from one family \(\mathcal{F}_1\) and evaluates on another family \(\mathcal{F}_2\), where the two families differ in their underlying sensing geometry. Typical examples include:
+\begin{itemize}
+    \item partial Fourier \(\rightarrow\) Gaussian;
+    \item Fourier \(\rightarrow\) Hadamard;
+    \item structured convolutional sensing \(\rightarrow\) Gaussian.
+\end{itemize}
+
+Cross-family transfer is substantially harder and generally less application-specific. In MRI, for example, one would not typically deploy a solver trained on Fourier operators to Gaussian sensing. Therefore, we do not treat cross-family transfer as the primary practical target. Instead, we use it as an \emph{out-of-family stress test} to probe how robust a method is under severe operator-class shift.
+
+\paragraph{Main research question.}
+With this terminology, the main question of interest becomes:
+\begin{quote}
+Can a reconstruction model exploit shared sensing geometry to generalize across unseen operators within a structured operator family?
+\end{quote}
+A secondary diagnostic question is:
+\begin{quote}
+How much of this robustness survives under out-of-family operator shift?
+\end{quote}
+
+\paragraph{The role of family diversity.}
+Not all within-family transfer problems are equally difficult. Beyond family membership, the difficulty of transfer depends on the diversity of the family itself, namely how much operator instances vary in their spectral properties, sampling profiles, Gram-matrix geometry, or underlying transform basis. When the family is narrow---for example, random partial Fourier masks at fixed acceleration---different operator instances may remain sufficiently similar that a single shared model generalizes well without explicit operator conditioning. As the family broadens---for example, across acceleration factors, sampling profiles, or related transform bases---the transfer problem becomes more difficult, and operator-specific structure becomes increasingly relevant.
+
+This induces a spectrum of transfer settings rather than a binary distinction. At one end lie narrow within-family settings, where transfer may be straightforward. At the other end lie out-of-family shifts, which serve as severe stress tests. Between these extremes lies the most informative regime: moderately diverse structured families, where shared inductive bias alone may no longer suffice and the value of operator conditioning can be meaningfully tested.
+
+\paragraph{Hierarchy of family structure.}
+Operator families admit a natural hierarchy of diversity. At the narrowest level, a family may consist of random masks from a single transform at fixed dimensions; in this regime, within-family transfer may be relatively easy for simple shared architectures. At a broader level, a family may span different acceleration factors, different sampling strategies, or related transform bases within a larger structured class. As diversity increases further, transfer approaches a genuinely cross-family setting, where the operator geometry changes qualitatively rather than quantitatively.
+
+This hierarchy is important for interpreting experimental results. A strong result on a narrow family does not imply robustness under broader family variation, and a negative result under severe family shift does not imply that the architecture has failed in realistic application settings. Instead, the experimental question is how transfer behavior changes as one moves along this hierarchy.
+
+\paragraph{Experimental progression.}
+Our experimental program probes this hierarchy of family diversity. We begin with narrow within-family transfer, where operators differ only by random masks within a fixed partial Fourier acquisition family. We then consider broader shifts, such as changes in acceleration factor or sampling geometry within the same structured family. Finally, we evaluate out-of-family transfer as a stress test, for example from Fourier-type operators to Gaussian sensing. This progression allows us to distinguish settings where transfer is intrinsically easy from settings where operator-aware mechanisms become important.
+
+\paragraph{Role of within-family and cross-family experiments.}
+Within-family experiments serve as the main application-grounded evaluation, since they correspond to realistic deployment scenarios in structured sensing systems. Cross-family experiments are used only as stress tests. They are informative for understanding the limits of a method's inductive bias, but they should not be conflated with the primary notion of transfer relevant to applications such as MRI.
+
+\paragraph{Implication for model design.}
+This formulation also clarifies the role of operator conditioning. If transfer is studied within a structured family, then conditioning mechanisms should be designed to capture the geometry shared across that family, such as mask structure, acceleration level, or operator Gram-matrix properties. In narrow families, a shared unconditioned model may already transfer well. In broader or more diverse families, explicit operator-specific structure may become increasingly useful. By contrast, success under cross-family stress testing would require a much stronger form of invariance, and should be interpreted separately from realistic within-family generalization.
+
+\end{document}

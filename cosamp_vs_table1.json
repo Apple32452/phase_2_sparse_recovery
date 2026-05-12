@@ -1,0 +1,71 @@
+{
+  "config": {
+    "n": 256,
+    "m": 128,
+    "k": 25,
+    "n_test": 500,
+    "amp_lo": 0.5,
+    "amp_hi": 2.0,
+    "test_seed": 1041
+  },
+  "fresh_results": {
+    "fourier": {
+      "CoSaMP": {
+        "nrmse_mean": 3.4307308957290706e-08,
+        "nrmse_std": 8.266502551229108e-09,
+        "iou_mean": 1.0,
+        "iou_std": 0.0
+      },
+      "HTP": {
+        "nrmse_mean": 0.09385273748671152,
+        "nrmse_std": 0.15114294521645796,
+        "iou_mean": 0.9019433923256472,
+        "iou_std": 0.1582678063646976
+      }
+    },
+    "gaussian": {
+      "CoSaMP": {
+        "nrmse_mean": 3.3503738980878165e-08,
+        "nrmse_std": 8.390263730991325e-09,
+        "iou_mean": 1.0,
+        "iou_std": 0.0
+      },
+      "HTP": {
+        "nrmse_mean": 0.31810653403593175,
+        "nrmse_std": 0.19419875993571964,
+        "iou_mean": 0.6794523600639414,
+        "iou_std": 0.1928528227485005
+      }
+    }
+  },
+  "table1_baselines": {
+    "Raw ISTA": {
+      "fourier": 0.8286880254745483,
+      "gaussian": 0.44645577669143677
+    },
+    "Naive top-k + LS": {
+      "fourier": 0.5270932224392891,
+      "gaussian": 0.25744982910149555
+    },
+    "Learned detector + LS": {
+      "fourier": 0.5268968705236912,
+      "gaussian": 0.2577867622629065
+    },
+    "LISTA, zero-shot": {
+      "fourier": 0.44636866450309753,
+      "gaussian": 0.3267055153846741
+    },
+    "Oracle support + LS": {
+      "fourier": 2.0811809216070288e-07,
+      "gaussian": 2.1540454402213528e-07
+    },
+    "CoSaMP  (NEW)": {
+      "fourier": 3.4307308957290706e-08,
+      "gaussian": 3.3503738980878165e-08
+    },
+    "HTP     (NEW)": {
+      "fourier": 0.09385273748671152,
+      "gaussian": 0.31810653403593175
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "config": {
+    "n": 256,
+    "m": 128,
+    "k": 55,
+    "T_ista": 30,
+    "lam_ista": 0.05,
+    "n_train": 4000,
+    "n_test": 500,
+    "epochs": 80,
+    "n_params": 4609,
+    "mu": 0.3528288006782532
+  },
+  "summary": {
+    "naive_topk": {
+      "nrmse_mean": 0.7917002300329169,
+      "nrmse_std": 0.060926781625007656,
+      "iou_mean": 0.32671539075147327,
+      "iou_std": 0.039315850212987384
+    },
+    "omp": {
+      "nrmse_mean": 0.9041724957209119,
+      "nrmse_std": 0.15266722669082025,
+      "iou_mean": 0.34079697963420974,
+      "iou_std": 0.08347341667747246
+    },
+    "cosamp": {
+      "nrmse_mean": 0.5533208802754851,
+      "nrmse_std": 0.11587811256642382,
+      "iou_mean": 0.5403297756035187,
+      "iou_std": 0.08816254903565166
+    },
+    "learned": {
+      "nrmse_mean": 0.594270873019108,
+      "nrmse_std": 0.09879526823431808,
+      "iou_mean": 0.5078883508236302,
+      "iou_std": 0.0727094815522149
+    },
+    "oracle": {
+      "nrmse_mean": 6.502208469310353e-08,
+      "nrmse_std": 8.25174646463728e-09,
+      "iou_mean": 1.0,
+      "iou_std": 0.0
+    }
+  },
+  "verdict": "Beats naive top-k but not CoSaMP. Headroom exists for richer methods."
+}

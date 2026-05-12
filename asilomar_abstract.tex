@@ -1,0 +1,206 @@
+% ============================================================
+% Asilomar 1-Page Extended Abstract — Polished Draft
+% Compile with: pdflatex asilomar_support_bottleneck_polished.tex
+% ============================================================
+
+\documentclass[conference,10pt]{IEEEtran}
+
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{cite}
+
+\title{Support Before Amplitude: A Bottleneck in Cross-Operator Sparse Recovery}
+
+\author{
+\IEEEauthorblockN{Di An}
+\IEEEauthorblockA{Johns Hopkins University\\
+Email: dan5@jhu.edu}
+\and
+\IEEEauthorblockN{Dylan Poppert}
+\IEEEauthorblockA{Johns Hopkins University\\
+Email: dpopper2@jhu.edu}
+\and
+\IEEEauthorblockN{Trac D. Tran}
+\IEEEauthorblockA{Johns Hopkins University\\
+Email: trac@jhu.edu}
+}
+
+\begin{document}
+\maketitle
+
+% \begin{abstract}
+% We study zero-shot transfer in sparse recovery when the sensing operator
+% changes between training and deployment. In the setting $n=256$,
+% $m=128$, and $k=25$, we train on Fourier measurements and evaluate on
+% Gaussian measurements. A simple parameter-free pipeline, consisting of
+% ISTA, naive top-$k$ support selection, and support-restricted least
+% squares, achieves Gaussian-test NRMSE $0.257$, improving over zero-shot
+% LISTA trained on the same Fourier data ($0.327$) by $21\%$ relative
+% NRMSE. Surprisingly, two learned coordinate-wise support detectors of
+% different capacity, both trained on ISTA-derived iterate features, match
+% but do not improve over naive magnitude ranking, with NRMSE differences
+% within $0.001$ across several $(T,\lambda)$ settings.
+
+% These results suggest that the cross-operator transfer failure is not
+% primarily an amplitude-estimation problem: with oracle support,
+% support-restricted least squares gives nearly exact recovery. Instead,
+% the bottleneck is support identification under operator shift. We
+% attribute the plateau of learned detectors to their iterate-only feature
+% interface, which exposes source-operator magnitude statistics but little
+% explicit information about the geometry of the deployment operator. This
+% diagnosis motivates an operator-aware support detector that augments each
+% coordinate with residual correlations, column norms, and Gram/coherence
+% features derived from the test-time sensing matrix. The resulting
+% decomposition preserves the classical support-then-amplitude structure
+% while asking whether lightweight operator-aware features can close the
+% gap to target-operator fine-tuning without requiring target labels.
+% \end{abstract}
+
+\begin{abstract}
+We study zero-shot sparse recovery under operator shift. On
+Fourier $\to$ Gaussian transfer ($n{=}256$, $m{=}128$, $k{=}25$),
+a parameter-free pipeline of ISTA, naive top-$k$ support selection,
+and support-restricted least squares achieves NRMSE $0.257$, improving
+over zero-shot LISTA ($0.327$) by $21\%$ relative. Two learned
+coordinate-wise detectors of differing capacity, both operating on
+iterate-derived features, tie naive magnitude ranking within $0.001$
+NRMSE. Because oracle support yields near-exact recovery, the binding
+constraint is support identification, not amplitude estimation. We
+trace the detector plateau to an iterate-only feature interface and
+propose operator-aware coordinate features---residual correlations and
+operator Gram statistics computed from the deployment matrix---as a
+minimal learned module for transfer without target labels.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Sparse recovery, compressed sensing, learned iterative reconstruction,
+LISTA, transfer learning, support detection.
+\end{IEEEkeywords}
+
+% ------------------------------------------------------------
+\section{Problem Setup}
+% ------------------------------------------------------------
+
+We consider sparse recovery from linear measurements
+\begin{equation}
+    y = A x + \varepsilon,
+\end{equation}
+where $x \in \mathbb{R}^{n}$ is $k$-sparse and
+$A \in \mathbb{R}^{m \times n}$ is the sensing matrix. Given a fixed
+operator $A$, we first compute an ISTA iterate
+\begin{equation}
+    x^{(T)} = \mathrm{ISTA}_{T}(y; A, \lambda).
+\end{equation}
+We then compare four recovery strategies under operator shift. All
+learned models are trained on $4{,}000$ Fourier-measurement signals and
+evaluated zero-shot on Gaussian measurements: (i) raw ISTA; (ii) naive
+top-$k$ support selection on $|x^{(T)}|$ followed by support-restricted
+least squares; (iii) a learned coordinate-wise support detector operating
+on iterate-derived features, again followed by least squares; and
+(iv) end-to-end LISTA.
+
+This setting separates two questions that are often entangled in learned
+sparse recovery: whether the method identifies the correct support, and
+whether it estimates the amplitudes accurately once the support is known.
+
+% ------------------------------------------------------------
+\section{Main Result}
+% ------------------------------------------------------------
+
+\begin{table}[t]
+\centering
+\caption{Zero-shot Fourier $\to$ Gaussian transfer at $T=30$,
+$\lambda=0.05$, $n=256$, $m=128$, and $k=25$.}
+\label{tab:main}
+\vspace{-4pt}
+\begin{tabular}{lc}
+\toprule
+\textbf{Method} & \textbf{Gaussian NRMSE} \\
+\midrule
+Raw ISTA                                  & 0.4465 \\
+Naive top-$k$ + LS                        & \textbf{0.2574} \\
+Learned detector + LS                     & 0.2578 \\
+LISTA, zero-shot                          & 0.3267 \\
+LISTA, $50$ Gaussian fine-tuning samples  & 0.2551 \\
+Oracle support + LS                       & $\approx 0$ \\
+\bottomrule
+\end{tabular}
+\vspace{-6pt}
+\end{table}
+
+Table~\ref{tab:main} shows that the parameter-free support-then-amplitude
+pipeline outperforms zero-shot LISTA by $21\%$ relative NRMSE. At the
+same time, learned support detectors operating on ISTA-derived features
+track naive top-$k$ selection almost exactly: across
+$(T,\lambda) \in \{(10,0.05),(30,0.05),(30,0.01)\}$ and across two
+detector architectures, their NRMSE differs from naive ranking by less
+than $0.001$. With approximately $50$ Gaussian fine-tuning samples, LISTA
+closes the gap, indicating that the zero-shot advantage is most relevant
+in the small-target-data regime.
+
+% ------------------------------------------------------------
+\section{Diagnosis: Support, Not Amplitude}
+% ------------------------------------------------------------
+
+The oracle-support result isolates the source of error. Once the correct
+support is known, support-restricted least squares gives nearly exact
+recovery. Therefore, the gap between the practical methods and oracle
+recovery is mainly caused by support misidentification rather than by
+inaccurate coefficient estimation.
+
+The plateau of learned detectors suggests that the feature interface is
+too restrictive. The detector input at coordinate $j$ is derived from
+$x^{(T)}_j$ and related magnitude statistics. However, $x^{(T)}$ is itself
+a nonlinear product of the ISTA dynamics and the sensing operator. Under a
+Fourier $\to$ Gaussian shift, these iterate-only features preserve the
+same coordinate-ranking information already exploited by naive top-$k$
+selection, but they do not explicitly encode the geometry of the
+deployment operator. This explains why the learned detector can match the
+magnitude baseline yet fails to improve over it.
+
+% ------------------------------------------------------------
+\section{Toward Operator-Aware Support Detection}
+% ------------------------------------------------------------
+
+The diagnosis suggests that support detectors should not be restricted to
+iterate-derived magnitude features. For each coordinate $j$, we propose
+augmenting the detector input with operator-aware features computed at
+test time:
+\begin{equation}
+\phi_j =
+\left[
+|x^{(T)}_j|,
+\; A_{:,j}^{\top}(y-Ax^{(T)}),
+\; \|A_{:,j}\|_2,
+\; (A^{\top}A)_{jj},
+\; \max_{i\neq j}|A_{:,i}^{\top}A_{:,j}|
+\right].
+\end{equation}
+The residual correlation term measures whether coordinate $j$ can still
+explain the current measurement residual, while the column norm, Gram
+diagonal, and coherence terms describe the local identifiability of that
+coordinate under the deployment operator. A lightweight coordinate-wise
+classifier can then estimate support probabilities from $\phi_j$, after
+which amplitudes are computed by least squares on the selected support.
+
+This design reintroduces the operator-dependent information exploited by
+unrolled methods such as LISTA, but confines learning to the support
+decision stage. The key empirical question is whether this operator-aware
+interface can improve zero-shot cross-operator support recovery and
+approach the performance of target-operator fine-tuning without using
+target labels.
+
+% ------------------------------------------------------------
+\section{Conclusion}
+% ------------------------------------------------------------
+
+Our results identify a support bottleneck in zero-shot cross-operator
+sparse recovery. In the studied Fourier $\to$ Gaussian setting, a simple
+ISTA + top-$k$ + least-squares pipeline outperforms zero-shot LISTA, while
+learned iterate-only support detectors fail to exceed naive magnitude
+ranking. These findings motivate operator-aware support detection as a
+minimal learned module for improving transfer: rather than learning the
+entire inverse map, the model learns only the support decision using both
+iterate state and test-time operator geometry.
+
+\end{document}
