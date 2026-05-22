@@ -1,12 +1,16 @@
-# Sparse Recovery Above the Phase Transition: A Learned Operator-Aware Approach
+# Sparse Recovery Above the Phase Transition
 
-This repository contains Phase 2 experiments for studying **learned sparse recovery above the classical phase transition**. The project compares classical compressed-sensing algorithms such as OMP and CoSaMP against learned operator-aware support detectors under strict-sparse, noisy, and compressible-signal regimes.
+This repository contains experiments for studying **when learned sparse recovery helps beyond classical compressed-sensing algorithms**.
 
-The central question is:
+The main question is:
 
-> When do learned sparse-recovery methods have a real advantage over classical algorithms?
+> When do learned sparse-recovery methods have a real advantage over classical algorithms such as OMP and CoSaMP?
 
-The main conclusion is that classical algorithms dominate below the phase transition, but learned operator-aware support detection has meaningful headroom in harder regimes, especially when signals are over-sparse or compressible.
+The short answer from the current experiments is:
+
+- Below the phase transition, classical methods such as CoSaMP are very strong.
+- Near or above the transition, support identification becomes difficult, creating headroom for learning.
+- The strongest learned advantage appears in **compressible-signal regimes**, where exact sparsity assumptions become mismatched.
 
 ---
 
@@ -22,7 +26,7 @@ where:
 
 - `A` is a sensing matrix,
 - `x` is a sparse or compressible signal,
-- `y` is the measurement vector,
+- `y` is the observed measurement vector,
 - `ε` is measurement noise.
 
 The main experimental setting is:
@@ -32,9 +36,7 @@ n = 256
 m = 128
 ```
 
-The sparsity level `k` is varied to test both easy and difficult recovery regimes.
-
-The key idea is that when oracle-support least squares succeeds but CoSaMP or OMP fails, the recovery problem is still possible in principle. The failure is mainly in **support identification**, which motivates using learned support detectors.
+The sparsity level `k`, measurement noise, operator family, and compressibility level are varied to test when classical and learned recovery methods succeed or fail.
 
 ---
 
@@ -42,76 +44,111 @@ The key idea is that when oracle-support least squares succeeds but CoSaMP or OM
 
 ### 1. Below the transition, classical methods win
 
-At `k = 25`, with `n = 256` and `m = 128`, CoSaMP achieves nearly exact recovery on both partial Fourier and Gaussian operators. In this regime, learned recovery does not provide a meaningful advantage because classical recovery is already very strong.
+At `k = 25`, with `n = 256` and `m = 128`, CoSaMP achieves near-exact recovery on both partial Fourier and Gaussian operators. In this easy strict-sparse regime, learning does not provide a meaningful advantage because classical recovery is already very strong.
 
-### 2. Above the transition, learning has headroom
+### 2. Near the transition, learning has headroom but not full dominance
 
-At `k = 55`, which is near or above the Donoho–Tanner weak threshold, greedy polynomial-time methods such as OMP and CoSaMP begin to fail. However, oracle-support least squares still recovers accurately.
+At larger sparsity levels such as `k = 55`, support identification becomes harder. Oracle-support least squares can still recover accurately, meaning the inverse problem is still well-posed if the correct support is known. However, greedy methods such as OMP and CoSaMP can begin to fail.
 
-This suggests that the difficult part is not amplitude recovery. The difficult part is choosing the correct support.
+A coordinate-wise learned support detector improves over simple correlation baselines and OMP, but it does not consistently dominate CoSaMP in the strict-sparse setting. Therefore, the correct claim is not that learning always beats classical recovery. The more precise claim is that learning has headroom when support identification becomes the bottleneck.
 
-### 3. Operator-aware support detection improves over simple baselines
+### 3. Compressible signals show the strongest learned advantage
 
-The learned detector uses coordinate-wise features that depend on both the signal estimate and the sensing operator. These include:
+For Gaussian compressible signals, the learned detector trained on mixed tail amplitudes beats CoSaMP at larger off-support tail amplitudes.
 
-- ISTA estimate magnitude,
-- residual correlation,
-- direct measurement correlation,
-- Gram diagonal information,
-- local coherence.
+In the current project draft, the learned detector improves over CoSaMP by approximately **8–10% relative NRMSE** at tail amplitudes `0.3–0.4`, consistently across multiple operator seeds and model initializations.
 
-A coordinate-wise MLP predicts support probabilities for each coordinate. The top-scoring indices are selected as the support, and amplitudes are recovered using least squares restricted to that support.
+This is the strongest current empirical evidence that learned operator-aware support detection can help when exact sparsity assumptions break.
 
-### 4. Compressible signals show the strongest learned advantage
+### 4. Attention is explored as a set-level mechanism
 
-For Gaussian compressible signals, the learned detector trained on mixed tail amplitudes beats CoSaMP at larger off-support tail amplitudes. In the project draft, the learned detector outperforms CoSaMP by about **8–10% relative NRMSE** at tail amplitudes `0.3–0.4`.
+The project also explores a **Gram-Aware Support Transformer**, or **GAST**, which uses attention over coordinate tokens and injects Gram-matrix information into the attention logits.
 
-This is the first concrete regime in the project where the learned method consistently beats CoSaMP.
+The motivation is that CoSaMP performs set-level reasoning through its merge-refit-prune loop, while a coordinate-wise MLP scores each coordinate independently.
 
-### 5. Attention is explored as a set-level mechanism
-
-The project also explores a Gram-Aware Support Transformer, or **GAST**, which uses attention over coordinate tokens and adds Gram-matrix information into the attention logits.
-
-The motivation is that CoSaMP performs set-level reasoning through its merge-refit-prune loop, while a coordinate-wise MLP scores each index independently.
-
-Preliminary results suggest that attention modestly improves the compressible regime but does not fully solve the strict-sparse `k = 55` regime.
+Preliminary results suggest that attention modestly improves the compressible regime, but a single attention block does not fully solve the strict-sparse `k = 55` regime.
 
 ---
 
 ## Repository Structure
 
 ```text
-phase_2/
-├── cosamp_stress_test.py
-├── cosamp_stress_test.png
-├── cosamp_stress_test.json
-├── diagnostic_structured.py
-├── diagnostic_structured.png
-├── diagnostic_structured.json
-├── cosamp_vs_table1.py
-├── cosamp_vs_table1.json
-├── exp1_family_transfer.py
-├── exp1b_cross_m_transfer.py
-├── exp2_attention_block.py
-├── exp2_cross_family.py
-├── exp3_gaussian_family.py
-├── exp3a_attention_option_a.py
-├── alpha_trajectories.png
-├── fig_pipeline_preview-1.png
-├── asilomar_abstract.tex
-├── asilomar_abstract.pdf
-├── asilomar_abstract_v2.tex
-├── asilomar_abstract_v2.pdf
-└── README.md
+phase_2_sparse_recovery/
+├── README.md
+├── requirements.txt
+├── .gitignore
+│
+├── experiments/
+│   ├── cosamp_stress_test.py
+│   ├── cosamp_vs_table1.py
+│   ├── diagnostic_structured.py
+│   ├── learned_above_pt.py
+│   ├── learned_compressible.py
+│   ├── secure_compressible.py
+│   ├── gast_quick.py
+│   ├── plot_gast_alphas.py
+│   ├── exp1_family_transfer.py
+│   ├── exp1b_cross_m_transfer.py
+│   ├── exp2_attention_block.py
+│   ├── exp2_cross_family.py
+│   ├── exp3_gaussian_family.py
+│   └── exp3a_attention_option_a.py
+│
+├── results/
+│   ├── cosamp/
+│   ├── diagnostics/
+│   ├── learned_above_pt/
+│   ├── learned_compressible/
+│   ├── secure_compressible/
+│   ├── gast/
+│   ├── exp1/
+│   ├── exp1b/
+│   ├── exp2_cf/
+│   ├── exp3/
+│   └── exp3a/
+│
+├── figures/
+│   ├── cosamp/
+│   ├── diagnostics/
+│   ├── learned_above_pt/
+│   ├── learned_compressible/
+│   ├── gast/
+│   └── paper/
+│
+├── paper/
+│   ├── asilomar_abstract.tex
+│   ├── asilomar_abstract.pdf
+│   ├── asilomar_abstract_v2.tex
+│   ├── asilomar_abstract_v2.pdf
+│   ├── research_strategy_summary.tex
+│   └── research_strategy_summary.pdf
+│
+├── notebooks/
+│   └── exploration.ipynb
+│
+├── scripts/
+│   └── reproduce_cosamp.sh
+│
+├── src/
+│   └── sparse_recovery/
+│       └── __init__.py
+│
+└── tests/
 ```
 
 ---
 
-## Main Files
+## Main Experiments
 
-### `cosamp_stress_test.py`
+### CoSaMP stress test
 
-Runs the main CoSaMP stress test across three perturbation axes:
+File:
+
+```text
+experiments/cosamp_stress_test.py
+```
+
+This script runs the main diagnostic stress test across three perturbation axes:
 
 1. **Sparsity sweep**
    - Varies `k`
@@ -121,55 +158,121 @@ Runs the main CoSaMP stress test across three perturbation axes:
    - Varies SNR
    - Tests robustness under measurement noise
 
-3. **Approximate-sparsity sweep**
+3. **Compressible-signal sweep**
    - Varies off-support tail amplitude
-   - Tests behavior when signals are compressible instead of exactly sparse
+   - Tests behavior when signals are compressible rather than exactly sparse
 
-This script compares:
+The script compares:
 
 - naive top-k correlation + least squares,
 - OMP,
 - CoSaMP,
 - oracle support + least squares.
 
-It writes:
+Outputs:
 
 ```text
-cosamp_stress_test.png
-cosamp_stress_test.json
+results/cosamp/cosamp_stress_test.json
+figures/cosamp/cosamp_stress_test.png
 ```
 
-### `diagnostic_structured.py`
+Important note: for compressible signals, the oracle/target support is defined as:
 
-Runs diagnostic experiments for structured and Gaussian sensing operators. This is useful for checking whether the sensing matrices, signal generation process, and recovery baselines behave correctly.
+```text
+TopK(|x|)
+```
 
-### `cosamp_vs_table1.py`
+That is, the best `k`-term support of the full compressible signal, not necessarily the original planted spike support.
 
-Generates table-style comparisons for the strict-sparse regime, especially around the difficult `k = 55` setting.
+---
 
-### `exp1_family_transfer.py`
+### Learned detector above the phase transition
 
-Tests transfer behavior across sensing-matrix families.
+File:
 
-### `exp1b_cross_m_transfer.py`
+```text
+experiments/learned_above_pt.py
+```
 
-Tests transfer across different numbers of measurements `m`.
+This experiment trains a coordinate-wise MLP support detector at the strict-sparse `k = 55` setting.
 
-### `exp2_attention_block.py`
+The detector uses operator-aware coordinate features:
 
-Runs the attention-based support recovery experiment. This file is related to the Gram-Aware Support Transformer idea.
+- ISTA estimate magnitude,
+- residual correlation,
+- direct measurement correlation,
+- Gram diagonal,
+- local coherence.
 
-### `exp2_cross_family.py`
+The model predicts support probabilities for each coordinate. The top-scoring coordinates are selected as the support, and amplitudes are recovered using least squares restricted to that support.
 
-Tests cross-family generalization of learned support recovery.
+---
 
-### `exp3_gaussian_family.py`
+### Learned detector under compressibility
 
-Runs Gaussian-family experiments, especially for compressible-signal settings.
+File:
 
-### `exp3a_attention_option_a.py`
+```text
+experiments/learned_compressible.py
+```
 
-Runs an additional attention-based experiment variant.
+This experiment evaluates the learned support detector on compressible Gaussian signals.
+
+Signals contain:
+
+- `k` large coefficients,
+- Gaussian off-support tail entries.
+
+The target support is the top-`k` entries of the full signal magnitude:
+
+```text
+TopK(|x|)
+```
+
+This setting is where the learned detector currently shows its strongest advantage over CoSaMP.
+
+---
+
+### Robust compressible-signal validation
+
+File:
+
+```text
+experiments/secure_compressible.py
+```
+
+This script checks whether the compressible-signal result is robust across multiple seeds.
+
+It runs:
+
+```text
+5 operator seeds × 3 initialization seeds = 15 runs
+```
+
+and computes paired bootstrap confidence intervals for the CoSaMP-vs-learned NRMSE gap.
+
+Output:
+
+```text
+results/secure_compressible/secure_compressible_summary.json
+```
+
+---
+
+### Gram-Aware Support Transformer
+
+File:
+
+```text
+experiments/gast_quick.py
+```
+
+This experiment compares:
+
+- coordinate-wise MLP support detector,
+- Gram-Aware Support Transformer, or GAST.
+
+GAST treats coordinates as tokens and adds Gram-matrix bias into the attention logits. It tests whether set-level attention helps beyond independent coordinate scoring.
 
 ---
 
@@ -182,143 +285,144 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-Install the main dependencies:
+Install dependencies:
 
 ```bash
-pip install numpy scipy matplotlib pandas scikit-learn
+pip install -r requirements.txt
 ```
 
-Some learned-model experiments may also require PyTorch:
+If `requirements.txt` is not available yet, install the core packages manually:
 
 ```bash
-pip install torch
+pip install numpy scipy matplotlib pandas scikit-learn torch tqdm pytest
 ```
 
 ---
 
 ## How to Run
 
-Run the main CoSaMP stress test:
+### Run the main CoSaMP stress test
 
 ```bash
-python cosamp_stress_test.py
+python experiments/cosamp_stress_test.py \
+  --out-dir results/cosamp \
+  --out-prefix cosamp_stress_test
 ```
 
-Run the diagnostic experiment:
-
-```bash
-python diagnostic_structured.py
-```
-
-Run the table comparison:
-
-```bash
-python cosamp_vs_table1.py
-```
-
-Run the learned recovery and transfer experiments:
-
-```bash
-python exp1_family_transfer.py
-python exp1b_cross_m_transfer.py
-python exp2_attention_block.py
-python exp2_cross_family.py
-python exp3_gaussian_family.py
-python exp3a_attention_option_a.py
-```
-
-If using JupyterLab, a script can also be run inside a notebook cell:
-
-```python
-%run cosamp_stress_test.py
-```
-
----
-
-## Example Result
-
-The main stress test identifies cells where CoSaMP fails while oracle recovery remains accurate:
+The script will write:
 
 ```text
-Cells where CoSaMP NRMSE > 0.10 AND oracle NRMSE < 0.05
+results/cosamp/cosamp_stress_test.json
+results/cosamp/cosamp_stress_test.png
 ```
 
-These are the most important regimes because they show that the measurement system still contains enough information for accurate recovery, but the classical algorithm fails to identify the correct support.
+To keep figures organized, move the PNG into the figures folder:
 
-Example difficult regimes include:
+```bash
+mkdir -p figures/cosamp
+mv results/cosamp/cosamp_stress_test.png figures/cosamp/
+```
+
+### Run with the reproduce script
+
+```bash
+bash scripts/reproduce_cosamp.sh
+```
+
+### Run learned strict-sparse experiment
+
+```bash
+python experiments/learned_above_pt.py
+```
+
+### Run learned compressible experiment
+
+```bash
+python experiments/learned_compressible.py
+```
+
+### Run robust compressible validation
+
+```bash
+python experiments/secure_compressible.py
+```
+
+### Run GAST experiment
+
+```bash
+python experiments/gast_quick.py
+```
+
+---
+
+## Current CoSaMP Stress-Test Interpretation
+
+After fixing the CoSaMP stopping condition, the easy regimes behave as expected:
 
 ```text
-Fourier, k=40
-Fourier, k=55
-Fourier, k=70
-Gaussian, k=55
-Gaussian, k=70
+k = 15 or k = 25:
+CoSaMP ≈ oracle
 ```
 
-In these settings, oracle least-squares recovery remains nearly exact, but CoSaMP has high NRMSE. This supports the motivation for learned support detection.
+Harder regimes show support-identification failure:
 
----
+```text
+Fourier:  k = 40, 55, 70
+Gaussian: k = 55, 70
+```
 
-## Method Overview
-
-The learned support detector follows a support-then-amplitude strategy:
-
-1. Build coordinate-wise features for each index.
-2. Predict a support probability for each coordinate.
-3. Select the top-scoring coordinates.
-4. Reconstruct amplitudes using least squares on the predicted support.
-
-The coordinate-wise feature vector includes information from the measurement operator and the residual, allowing the model to adapt to the deployed sensing matrix.
-
----
-
-## Why This Project Matters
-
-Classical compressed-sensing methods are powerful when their assumptions hold. However, real signals are often:
-
-- not exactly sparse,
-- affected by noise,
-- structured by unknown priors,
-- observed through fixed deployment operators,
-- not accompanied by known true sparsity `k`.
-
-This project investigates whether learned support recovery can exploit operator structure and signal-prior information to improve recovery in those harder regimes.
-
----
-
-## Current Conclusion
-
-This project does **not** claim that learning always beats classical sparse recovery. Instead, it makes a more precise claim:
-
-> Below the phase transition, classical methods dominate. Above the transition and under compressibility, learned operator-aware recovery has genuine headroom.
-
-The strongest empirical win so far occurs for Gaussian compressible signals, where the learned detector consistently outperforms CoSaMP at high tail amplitudes.
-
----
-
-## Future Work
-
-Planned extensions include:
-
-- iterative learned recovery inspired by CoSaMP’s merge-refit-prune structure,
-- learned adaptive cardinality instead of fixed top-k selection,
-- block-sparse and cluster-sparse signal priors,
-- stronger set-level attention mechanisms,
-- improved operator-aware features,
-- broader testing across sensing operators and signal distributions.
+These are important because oracle support least squares remains accurate while CoSaMP degrades, suggesting that support identification rather than amplitude estimation is the main bottleneck.
 
 ---
 
 ## Paper Draft
 
-This repository includes an Asilomar-style project draft:
+The paper draft is stored in:
 
 ```text
-asilomar_abstract_v2.tex
-asilomar_abstract_v2.pdf
+paper/
 ```
 
-The draft summarizes the motivation, experimental setup, classical baselines, learned detector, compressibility results, and preliminary attention-based extension.
+Important files include:
+
+```text
+paper/asilomar_abstract.tex
+paper/asilomar_abstract.pdf
+paper/asilomar_abstract_v2.tex
+paper/asilomar_abstract_v2.pdf
+paper/research_strategy_summary.tex
+paper/research_strategy_summary.pdf
+```
+
+If compiling the paper locally, make sure the required figures are available in the correct folder. Common paper figures include:
+
+```text
+figures/cosamp/cosamp_stress_test.png
+figures/gast/alpha_trajectories.png
+figures/paper/fig_support_bottleneck.png
+```
+
+---
+
+## Future Work
+
+Planned directions include:
+
+1. **Unknown cardinality**
+   - Replace fixed top-k selection with learned thresholding.
+   - Compare against CoSaMP with misspecified `k`.
+
+2. **Structured priors**
+   - Test block-sparse, cluster-sparse, and transform-domain compressible signals.
+   - Measure whether learned recovery benefits from amortized prior information.
+
+3. **Iterative learned recovery**
+   - Build a learnable analogue of CoSaMP's merge-refit-prune loop.
+   - Add operator-aware scoring or attention at each iteration.
+
+4. **Broader phase diagrams**
+   - Sweep over `m/n`, `k/m`, operator families, and signal distributions.
+   - Identify where learned methods truly outperform classical baselines.
 
 ---
 
