@@ -278,10 +278,17 @@ def cosamp(A: np.ndarray, y: np.ndarray, k: int, max_iters: int = 30, tol: float
         x = np.zeros(n, dtype=np.float64)
         x[S_list] = safe_lstsq(A[:, S_list], y)
 
-        if S_new == S_prev:
+        # Stop only after at least one previous support exists.
+        # The previous version compared against prev_res_norm = inf,
+        # which caused CoSaMP to stop after one iteration and behave
+        # almost exactly like naive top-k + LS.
+        if S_new == S_prev and S_prev:
             break
-        if abs(prev_res_norm - res_norm) <= tol * max(1.0, prev_res_norm):
-            break
+
+        if np.isfinite(prev_res_norm):
+            improvement = prev_res_norm - res_norm
+            if improvement >= 0.0 and improvement <= tol * max(1.0, prev_res_norm):
+                break
 
         prev_res_norm = res_norm
         S_prev = S_new
