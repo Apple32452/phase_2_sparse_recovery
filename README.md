@@ -1,16 +1,18 @@
 # Sparse Recovery Above the Phase Transition
 
-This repository contains experiments for studying **when learned sparse recovery helps beyond classical compressed-sensing algorithms**.
+This repository contains Phase 2 experiments for studying **when learned sparse recovery has a real advantage over classical compressed-sensing algorithms**.
 
-The main question is:
+The project compares classical sparse-recovery methods such as **OMP**, **CoSaMP**, and **HTP** against learned operator-aware support detectors under strict-sparse, noisy, and compressible-signal regimes.
 
-> When do learned sparse-recovery methods have a real advantage over classical algorithms such as OMP and CoSaMP?
+The central question is:
 
-The short answer from the current experiments is:
+> When do learned sparse-recovery methods have a real advantage over classical algorithms?
+
+Current conclusion:
 
 - Below the phase transition, classical methods such as CoSaMP are very strong.
 - Near or above the transition, support identification becomes difficult, creating headroom for learning.
-- The strongest learned advantage appears in **compressible-signal regimes**, where exact sparsity assumptions become mismatched.
+- The strongest learned advantage appears in **compressible-signal regimes**, where exact-sparsity assumptions become mismatched.
 
 ---
 
@@ -26,7 +28,7 @@ where:
 
 - `A` is a sensing matrix,
 - `x` is a sparse or compressible signal,
-- `y` is the observed measurement vector,
+- `y` is the measurement vector,
 - `ε` is measurement noise.
 
 The main experimental setting is:
@@ -36,7 +38,7 @@ n = 256
 m = 128
 ```
 
-The sparsity level `k`, measurement noise, operator family, and compressibility level are varied to test when classical and learned recovery methods succeed or fail.
+The sparsity level `k`, measurement noise, sensing operator, and compressibility level are varied to test when classical and learned recovery methods succeed or fail.
 
 ---
 
@@ -44,13 +46,21 @@ The sparsity level `k`, measurement noise, operator family, and compressibility 
 
 ### 1. Below the transition, classical methods win
 
-At `k = 25`, with `n = 256` and `m = 128`, CoSaMP achieves near-exact recovery on both partial Fourier and Gaussian operators. In this easy strict-sparse regime, learning does not provide a meaningful advantage because classical recovery is already very strong.
+At `k = 25`, with `n = 256` and `m = 128`, CoSaMP achieves near-exact recovery on both partial Fourier and Gaussian operators.
+
+This means easy strict-sparse recovery is not a good regime for claiming a learned advantage, because classical algorithms already solve the problem nearly perfectly.
 
 ### 2. Near the transition, learning has headroom but not full dominance
 
-At larger sparsity levels such as `k = 55`, support identification becomes harder. Oracle-support least squares can still recover accurately, meaning the inverse problem is still well-posed if the correct support is known. However, greedy methods such as OMP and CoSaMP can begin to fail.
+At larger sparsity levels such as `k = 55`, support identification becomes harder.
 
-A coordinate-wise learned support detector improves over simple correlation baselines and OMP, but it does not consistently dominate CoSaMP in the strict-sparse setting. Therefore, the correct claim is not that learning always beats classical recovery. The more precise claim is that learning has headroom when support identification becomes the bottleneck.
+Oracle-support least squares can still recover accurately, which means the inverse problem is still well-posed if the correct support is known. However, greedy methods such as OMP and CoSaMP can begin to fail.
+
+A coordinate-wise learned support detector improves over simple correlation baselines and OMP, but it does not consistently dominate CoSaMP in the strict-sparse setting.
+
+Therefore, the correct claim is:
+
+> Learning has headroom when support identification becomes the bottleneck, but it does not automatically beat classical sparse recovery in every regime.
 
 ### 3. Compressible signals show the strongest learned advantage
 
@@ -58,7 +68,7 @@ For Gaussian compressible signals, the learned detector trained on mixed tail am
 
 In the current project draft, the learned detector improves over CoSaMP by approximately **8–10% relative NRMSE** at tail amplitudes `0.3–0.4`, consistently across multiple operator seeds and model initializations.
 
-This is the strongest current empirical evidence that learned operator-aware support detection can help when exact sparsity assumptions break.
+This is the strongest current empirical evidence that learned operator-aware support detection can help when exact-sparsity assumptions break.
 
 ### 4. Attention is explored as a set-level mechanism
 
@@ -92,7 +102,8 @@ phase_2_sparse_recovery/
 │   ├── exp2_attention_block.py
 │   ├── exp2_cross_family.py
 │   ├── exp3_gaussian_family.py
-│   └── exp3a_attention_option_a.py
+│   ├── exp3a_attention_option_a.py
+│   └── fig_support_bottleneck.py
 │
 ├── results/
 │   ├── cosamp/
@@ -152,15 +163,15 @@ This script runs the main diagnostic stress test across three perturbation axes:
 
 1. **Sparsity sweep**
    - Varies `k`
-   - Tests where OMP and CoSaMP begin to fail
+   - Tests where OMP and CoSaMP begin to fail.
 
 2. **Noise sweep**
-   - Varies SNR
-   - Tests robustness under measurement noise
+   - Varies SNR.
+   - Tests robustness under measurement noise.
 
 3. **Compressible-signal sweep**
-   - Varies off-support tail amplitude
-   - Tests behavior when signals are compressible rather than exactly sparse
+   - Varies off-support tail amplitude.
+   - Tests behavior when signals are compressible rather than exactly sparse.
 
 The script compares:
 
@@ -183,6 +194,53 @@ TopK(|x|)
 ```
 
 That is, the best `k`-term support of the full compressible signal, not necessarily the original planted spike support.
+
+---
+
+### CoSaMP vs Table 1 comparison
+
+File:
+
+```text
+experiments/cosamp_vs_table1.py
+```
+
+This script checks the strict-sparse `k = 25` setting and compares CoSaMP/HTP against Table-1-style baselines when the old `phase_1` result JSON is available.
+
+If the old `phase_1` JSON is missing, the script still runs and saves fresh CoSaMP/HTP results.
+
+Output:
+
+```text
+results/cosamp/cosamp_vs_table1.json
+```
+
+Current interpretation:
+
+```text
+n = 256, m = 128, k = 25
+```
+
+CoSaMP achieves near-oracle recovery on both Fourier and Gaussian operators. This confirms that below-transition strict-sparse recovery is not the right setting for claiming a learned advantage.
+
+---
+
+### Diagnostic structured experiment
+
+File:
+
+```text
+experiments/diagnostic_structured.py
+```
+
+This experiment checks whether the sensing operators, signal generation process, and recovery baselines behave as expected.
+
+Outputs:
+
+```text
+results/diagnostics/diagnostic_structured.json
+figures/diagnostics/diagnostic_structured.png
+```
 
 ---
 
@@ -291,7 +349,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-If `requirements.txt` is not available yet, install the core packages manually:
+If `requirements.txt` is not available, install the core packages manually:
 
 ```bash
 pip install numpy scipy matplotlib pandas scikit-learn torch tqdm pytest
@@ -304,53 +362,99 @@ pip install numpy scipy matplotlib pandas scikit-learn torch tqdm pytest
 ### Run the main CoSaMP stress test
 
 ```bash
-python experiments/cosamp_stress_test.py \
-  --out-dir results/cosamp \
-  --out-prefix cosamp_stress_test
+bash scripts/reproduce_cosamp.sh
 ```
 
-The script will write:
+This regenerates:
 
 ```text
 results/cosamp/cosamp_stress_test.json
-results/cosamp/cosamp_stress_test.png
+figures/cosamp/cosamp_stress_test.png
 ```
 
-To keep figures organized, move the PNG into the figures folder:
+You can also run it manually:
 
 ```bash
+python experiments/cosamp_stress_test.py \
+  --out-dir results/cosamp \
+  --out-prefix cosamp_stress_test
+
 mkdir -p figures/cosamp
-mv results/cosamp/cosamp_stress_test.png figures/cosamp/
+mv -f results/cosamp/cosamp_stress_test.png figures/cosamp/
 ```
 
-### Run with the reproduce script
+---
+
+### Run the CoSaMP vs Table 1 comparison
 
 ```bash
-bash scripts/reproduce_cosamp.sh
+python experiments/cosamp_vs_table1.py
 ```
+
+Output:
+
+```text
+results/cosamp/cosamp_vs_table1.json
+```
+
+---
+
+### Run diagnostic structured experiment
+
+```bash
+python experiments/diagnostic_structured.py
+
+mkdir -p results/diagnostics figures/diagnostics
+mv -f experiments/diagnostic_structured.json results/diagnostics/
+mv -f experiments/diagnostic_structured.png figures/diagnostics/
+```
+
+---
 
 ### Run learned strict-sparse experiment
 
 ```bash
 python experiments/learned_above_pt.py
+
+mkdir -p results/learned_above_pt figures/learned_above_pt
+mv -f experiments/learned_above_pt.json results/learned_above_pt/
+mv -f experiments/learned_above_pt.png figures/learned_above_pt/
 ```
+
+---
 
 ### Run learned compressible experiment
 
 ```bash
 python experiments/learned_compressible.py
+
+mkdir -p results/learned_compressible figures/learned_compressible
+mv -f experiments/learned_compressible*.json results/learned_compressible/
+mv -f experiments/learned_compressible*.png figures/learned_compressible/
 ```
+
+---
 
 ### Run robust compressible validation
 
 ```bash
 python experiments/secure_compressible.py
+
+mkdir -p results/secure_compressible results/learned_compressible figures/learned_compressible
+mv -f experiments/secure_compressible_summary.json results/secure_compressible/ 2>/dev/null || true
+mv -f experiments/learned_compressible*.json results/learned_compressible/ 2>/dev/null || true
+mv -f experiments/learned_compressible*.png figures/learned_compressible/ 2>/dev/null || true
 ```
+
+---
 
 ### Run GAST experiment
 
 ```bash
 python experiments/gast_quick.py
+
+mkdir -p results/gast
+mv -f experiments/gast_quick*.json results/gast/
 ```
 
 ---
@@ -375,6 +479,20 @@ These are important because oracle support least squares remains accurate while 
 
 ---
 
+## Known Issue
+
+`experiments/fig_support_bottleneck.py` currently depends on an old missing file:
+
+```text
+phase_1/results/ista_comparison_T30_lam0.05.json
+```
+
+Because that file is not part of the cleaned repository, this script may fail unless the old `phase_1` results are restored or the script is rewritten to use the current result files.
+
+This does not affect the main CoSaMP stress test or the cleaned repository workflow.
+
+---
+
 ## Paper Draft
 
 The paper draft is stored in:
@@ -394,13 +512,15 @@ paper/research_strategy_summary.tex
 paper/research_strategy_summary.pdf
 ```
 
-If compiling the paper locally, make sure the required figures are available in the correct folder. Common paper figures include:
+Common paper figures include:
 
 ```text
 figures/cosamp/cosamp_stress_test.png
 figures/gast/alpha_trajectories.png
 figures/paper/fig_support_bottleneck.png
 ```
+
+If compiling LaTeX from inside `paper/`, either copy required figures into `paper/figures/` or update the figure paths accordingly.
 
 ---
 
