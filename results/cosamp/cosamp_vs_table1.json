@@ -6,66 +6,50 @@
     "n_test": 500,
     "amp_lo": 0.5,
     "amp_hi": 2.0,
-    "test_seed": 1041
+    "test_seed": 1041,
+    "table1_json": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/phase_1/results/ista_comparison_T30_lam0.05.json",
+    "table1_json_exists": false
   },
   "fresh_results": {
     "fourier": {
       "CoSaMP": {
-        "nrmse_mean": 3.4307308957290706e-08,
-        "nrmse_std": 8.266502551229108e-09,
+        "nrmse_mean": 3.4330122119725986e-08,
+        "nrmse_std": 8.054691091525684e-09,
         "iou_mean": 1.0,
         "iou_std": 0.0
       },
       "HTP": {
-        "nrmse_mean": 0.09385273748671152,
-        "nrmse_std": 0.15114294521645796,
+        "nrmse_mean": 0.09385273731064737,
+        "nrmse_std": 0.1511429451477429,
         "iou_mean": 0.9019433923256472,
         "iou_std": 0.1582678063646976
       }
     },
     "gaussian": {
       "CoSaMP": {
-        "nrmse_mean": 3.3503738980878165e-08,
-        "nrmse_std": 8.390263730991325e-09,
+        "nrmse_mean": 3.4151975686231884e-08,
+        "nrmse_std": 8.133609886511126e-09,
         "iou_mean": 1.0,
         "iou_std": 0.0
       },
       "HTP": {
-        "nrmse_mean": 0.31810653403593175,
-        "nrmse_std": 0.19419875993571964,
+        "nrmse_mean": 0.3181065341214685,
+        "nrmse_std": 0.19419876109238587,
         "iou_mean": 0.6794523600639414,
         "iou_std": 0.1928528227485005
       }
     }
   },
-  "table1_baselines": {
-    "Raw ISTA": {
-      "fourier": 0.8286880254745483,
-      "gaussian": 0.44645577669143677
+  "table1_comparison_rows": [
+    {
+      "method": "CoSaMP",
+      "fourier_nrmse": 3.4330122119725986e-08,
+      "gaussian_nrmse": 3.4151975686231884e-08
     },
-    "Naive top-k + LS": {
-      "fourier": 0.5270932224392891,
-      "gaussian": 0.25744982910149555
-    },
-    "Learned detector + LS": {
-      "fourier": 0.5268968705236912,
-      "gaussian": 0.2577867622629065
-    },
-    "LISTA, zero-shot": {
-      "fourier": 0.44636866450309753,
-      "gaussian": 0.3267055153846741
-    },
-    "Oracle support + LS": {
-      "fourier": 2.0811809216070288e-07,
-      "gaussian": 2.1540454402213528e-07
-    },
-    "CoSaMP  (NEW)": {
-      "fourier": 3.4307308957290706e-08,
-      "gaussian": 3.3503738980878165e-08
-    },
-    "HTP     (NEW)": {
-      "fourier": 0.09385273748671152,
-      "gaussian": 0.31810653403593175
+    {
+      "method": "HTP",
+      "fourier_nrmse": 0.09385273731064737,
+      "gaussian_nrmse": 0.3181065341214685
     }
-  }
+  ]
 }
