@@ -339,3 +339,289 @@ If referencing this project, please cite the accompanying draft:
 Sparse Recovery Above the Phase Transition:
 A Learned Operator-Aware Approach
 ```
+
+## Recent Diagnostic Experiments
+
+This repository now includes several diagnostic experiments designed to make the paper more rigorous and to separate easy sparse-recovery regimes from regimes where learning or structured priors may provide real value.
+
+---
+
+### Small-n ceiling study
+
+File:
+
+```text
+experiments/ceiling_study_small_n.py
+```
+
+This experiment tests whether hard sparse-recovery regimes are algorithmically difficult or information-limited. It uses small dimensions where exact (L_0) support search is computationally feasible.
+
+The experiment compares:
+
+```text
+naive top-k correlation
+OMP
+CoSaMP
+HTP
+exact L0 search
+oracle support + least squares
+```
+
+Main finding:
+
+```text
+Exact L0 remains near oracle while OMP, CoSaMP, HTP, and naive top-k degrade as sparsity increases.
+```
+
+This suggests that, in the tested small-(n) setting, the hard region is not immediately information-theoretically impossible. Instead, there remains algorithmic headroom. However, the ambiguity gap between the best and second-best supports shrinks rapidly as (k) increases, suggesting that the problem is approaching a support-identification ceiling.
+
+Outputs:
+
+```text
+results/ceiling/
+figures/ceiling/
+```
+
+Aggregate script:
+
+```text
+experiments/aggregate_ceiling_study.py
+```
+
+---
+
+### Unknown-(k) experiment
+
+File:
+
+```text
+experiments/unknown_k.py
+```
+
+This experiment tests sparse recovery when the true sparsity (k) is unknown.
+
+The experiment compares:
+
+```text
+CoSaMP with true k
+CoSaMP with fixed k
+OMP with residual stopping
+learned-k predictor + CoSaMP
+```
+
+Main finding:
+
+```text
+Learned-k CoSaMP improves over poor fixed-k and residual-stopping baselines, but it does not beat oracle-k CoSaMP.
+```
+
+This suggests that cardinality estimation helps, but the main bottleneck remains support selection.
+
+Outputs:
+
+```text
+results/unknown_k/
+figures/unknown_k/
+```
+
+---
+
+### Structured-prior experiments
+
+File:
+
+```text
+experiments/structured_priors.py
+```
+
+This experiment tests whether structured supports create regimes where prior-aware recovery can outperform generic sparse-recovery algorithms.
+
+Signal families:
+
+```text
+iid_sparse
+block_sparse
+cluster_sparse
+markov_sparse
+```
+
+Methods:
+
+```text
+naive top-k correlation
+OMP
+CoSaMP
+HTP
+smoothed_topk
+block_score_topk
+oracle support + least squares
+```
+
+Main finding:
+
+```text
+In easy regimes, CoSaMP is near oracle and structured priors are unnecessary.
+In harder regimes, block_score_topk begins to outperform CoSaMP on block-sparse signals.
+```
+
+This suggests that structured priors create measurable algorithmic headroom, especially for block-sparse recovery.
+
+Outputs:
+
+```text
+results/structured_priors/
+figures/structured_priors/
+```
+
+Aggregate script:
+
+```text
+experiments/aggregate_structured_priors.py
+```
+
+---
+
+### Learned structured-prior detector
+
+File:
+
+```text
+experiments/learned_structured_prior.py
+```
+
+This experiment trains a family-specific local/context support detector using coordinate-level features.
+
+Methods:
+
+```text
+naive top-k correlation
+CoSaMP
+smoothed_topk
+block_score_topk
+learned_structured
+oracle support + least squares
+```
+
+Main finding:
+
+```text
+The learned local/context detector improves over some naive structured heuristics, but it does not consistently beat CoSaMP.
+```
+
+This suggests that coordinate-wise learning is not sufficient. The next model should use stronger block-level or sequence-level aggregation.
+
+Outputs:
+
+```text
+results/learned_structured_prior/
+figures/learned_structured_prior/
+```
+
+---
+
+### Learned block scorer
+
+File:
+
+```text
+experiments/learned_block_scorer.py
+```
+
+This experiment focuses on the strongest structured-prior signal: block-sparse recovery.
+
+Instead of scoring coordinates independently, the learned block scorer predicts active blocks first, then selects coordinates inside the highest-probability blocks.
+
+Methods:
+
+```text
+naive top-k correlation
+CoSaMP
+block_score_topk
+learned_block_scorer
+oracle support + least squares
+```
+
+Main finding:
+
+```text
+For n=256 and m=96, the learned block scorer improves over CoSaMP at both k=40 and k=55. However, the hand-designed block_score_topk baseline remains slightly stronger.
+```
+
+This confirms that block-level structure is useful, but also shows that the current learned block scorer is not yet strong enough to beat a specialized hand-designed block heuristic.
+
+Fixed outputs:
+
+```text
+results/learned_block_scorer/learned_block_scorer_m96_k40_fixed.json
+results/learned_block_scorer/learned_block_scorer_m96_k55_fixed.json
+figures/learned_block_scorer/learned_block_scorer_m96_k40_fixed_nrmse.png
+figures/learned_block_scorer/learned_block_scorer_m96_k55_fixed_nrmse.png
+```
+
+Aggregate script:
+
+```text
+experiments/aggregate_learned_block_scorer.py
+```
+
+Aggregate outputs:
+
+```text
+results/learned_block_scorer/aggregate_learned_block_scorer.json
+figures/learned_block_scorer/aggregate_learned_block_scorer_nrmse.png
+figures/learned_block_scorer/aggregate_learned_block_scorer_gains.png
+```
+
+---
+
+## Current Research Interpretation
+
+The current experimental evidence supports the following refined paper story:
+
+```text
+1. Easy strict-sparse regimes are not good settings for claiming a learned advantage because CoSaMP is often near oracle.
+
+2. Small-n ceiling studies show that exact L0 can remain oracle-level even when greedy algorithms fail, suggesting algorithmic headroom.
+
+3. Unknown-k experiments show that cardinality estimation helps, but support selection remains the main bottleneck.
+
+4. Structured priors matter most in harder regimes, especially for block-sparse signals.
+
+5. Learned block scoring improves over CoSaMP, but the hand-designed block_score_topk baseline remains slightly stronger.
+
+6. The next step is to develop an iterative learned block-refinement method that combines block-level prior information with CoSaMP-style residual correction.
+```
+
+---
+
+## Next Planned Experiment
+
+The next experiment is:
+
+```text
+experiments/iterative_learned_block_refinement.py
+```
+
+Goal:
+
+```text
+Start from learned block scoring, then iteratively refine the support using residual correlations, block probabilities, least-squares refitting, and pruning.
+```
+
+This is motivated by the observation that:
+
+```text
+learned_block_scorer > CoSaMP
+block_score_topk > learned_block_scorer
+```
+
+The next model should try to combine the strengths of both:
+
+```text
+block-level learned prior
++
+iterative residual correction
++
+least-squares refit/prune
+```
+
