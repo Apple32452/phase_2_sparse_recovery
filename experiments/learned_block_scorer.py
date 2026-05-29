@@ -91,24 +91,37 @@ def fill_amplitudes(n: int, support: set[int], rng: np.random.Generator):
 
 def block_sparse_signal(n: int, k: int, block_size: int, rng: np.random.Generator):
     """
-    Generate an exactly k-sparse signal whose support is block-structured.
-    When k is a multiple of block_size, this creates full active blocks.
+    Generate an exactly k-sparse signal with full block structure.
+
+    Uses only full blocks so the final partial block does not create
+    supports smaller than k.
     """
-    n_blocks = int(np.ceil(n / block_size))
+    n_full_blocks = n // block_size
     blocks_needed = int(np.ceil(k / block_size))
 
-    chosen_blocks = rng.choice(n_blocks, size=blocks_needed, replace=False)
+    support = set()
+    chosen_blocks = set()
 
-    support = []
-    for b in chosen_blocks:
-        lo = int(b * block_size)
-        hi = min(n, lo + block_size)
-        support.extend(range(lo, hi))
+    while len(support) < k:
+        available = [b for b in range(n_full_blocks) if b not in chosen_blocks]
+        if not available:
+            break
 
-    support = set(int(i) for i in support[:k])
+        b = int(rng.choice(available))
+        chosen_blocks.add(b)
+
+        lo = b * block_size
+        hi = lo + block_size
+
+        for j in range(lo, hi):
+            support.add(int(j))
+            if len(support) >= k:
+                break
+
+    support = set(sorted(support)[:k])
     x = fill_amplitudes(n, support, rng)
 
-    return x, support, set(int(b) for b in chosen_blocks)
+    return x, support, chosen_blocks
 
 
 def add_noise(y: np.ndarray, noise_std: float, rng: np.random.Generator):

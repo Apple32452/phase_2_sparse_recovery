@@ -1,0 +1,159 @@
+{
+  "config": {
+    "n": 256,
+    "m": 96,
+    "k": 55,
+    "block_size": 5,
+    "n_train": 1000,
+    "n_test": 300,
+    "seed": 0,
+    "noise_std": 0.0,
+    "max_iters": 30,
+    "out_prefix": "learned_block_scorer_m96_k55_fixed"
+  },
+  "methods": [
+    "naive",
+    "cosamp",
+    "block_score_topk",
+    "learned_block_scorer",
+    "oracle"
+  ],
+  "summary": {
+    "naive": {
+      "nrmse": {
+        "mean": 0.9216619231609268,
+        "std": 0.07188219062359977,
+        "median": 0.9181786756072025
+      },
+      "iou": {
+        "mean": 0.28395831791167997,
+        "std": 0.03858094379592544,
+        "median": 0.27906976744186046
+      },
+      "precision": {
+        "mean": 0.44090909090909086,
+        "std": 0.04690122085731175,
+        "median": 0.43636363636363634
+      },
+      "recall": {
+        "mean": 0.44090909090909086,
+        "std": 0.04690122085731175,
+        "median": 0.43636363636363634
+      },
+      "support_size": {
+        "mean": 55.0,
+        "std": 0.0,
+        "median": 55.0
+      }
+    },
+    "cosamp": {
+      "nrmse": {
+        "mean": 0.8265636144305223,
+        "std": 0.07463914116109227,
+        "median": 0.8214939130037304
+      },
+      "iou": {
+        "mean": 0.35947528492782754,
+        "std": 0.05395271031921848,
+        "median": 0.35802469135802467
+      },
+      "precision": {
+        "mean": 0.5265454545454544,
+        "std": 0.05800655420362868,
+        "median": 0.5272727272727272
+      },
+      "recall": {
+        "mean": 0.5265454545454544,
+        "std": 0.05800655420362868,
+        "median": 0.5272727272727272
+      },
+      "support_size": {
+        "mean": 55.0,
+        "std": 0.0,
+        "median": 55.0
+      }
+    },
+    "block_score_topk": {
+      "nrmse": {
+        "mean": 0.7652029216003441,
+        "std": 0.14660115642509794,
+        "median": 0.7710869862959281
+      },
+      "iou": {
+        "mean": 0.529272031889679,
+        "std": 0.11756850548605761,
+        "median": 0.5714285714285714
+      },
+      "precision": {
+        "mean": 0.6844848484848485,
+        "std": 0.10071122652337255,
+        "median": 0.7272727272727273
+      },
+      "recall": {
+        "mean": 0.6844848484848485,
+        "std": 0.10071122652337255,
+        "median": 0.7272727272727273
+      },
+      "support_size": {
+        "mean": 55.0,
+        "std": 0.0,
+        "median": 55.0
+      }
+    },
+    "learned_block_scorer": {
+      "nrmse": {
+        "mean": 0.7759915694017139,
+        "std": 0.15019777029360415,
+        "median": 0.7797223792163207
+      },
+      "iou": {
+        "mean": 0.5141749383514089,
+        "std": 0.11917821515258285,
+        "median": 0.4666666666666667
+      },
+      "precision": {
+        "mean": 0.6709090909090908,
+        "std": 0.1053238479531507,
+        "median": 0.6363636363636364
+      },
+      "recall": {
+        "mean": 0.6709090909090908,
+        "std": 0.1053238479531507,
+        "median": 0.6363636363636364
+      },
+      "support_size": {
+        "mean": 55.0,
+        "std": 0.0,
+        "median": 55.0
+      }
+    },
+    "oracle": {
+      "nrmse": {
+        "mean": 2.0376202430681093e-15,
+        "std": 4.41356687633487e-16,
+        "median": 1.9444839102188415e-15
+      },
+      "iou": {
+        "mean": 1.0,
+        "std": 0.0,
+        "median": 1.0
+      },
+      "precision": {
+        "mean": 1.0,
+        "std": 0.0,
+        "median": 1.0
+      },
+      "recall": {
+        "mean": 1.0,
+        "std": 0.0,
+        "median": 1.0
+      },
+      "support_size": {
+        "mean": 55.0,
+        "std": 0.0,
+        "median": 55.0
+      }
+    }
+  },
+  "interpretation": "learned_block_scorer predicts active blocks first, then selects coordinates inside the highest-probability blocks. It should be compared primarily against block_score_topk and CoSaMP."
+}
