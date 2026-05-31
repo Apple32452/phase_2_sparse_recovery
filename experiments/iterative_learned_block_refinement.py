@@ -1,34 +1,35 @@
 """
-learned_block_scorer.py
+iterative_learned_block_refinement.py
 
-Learned block-level support recovery experiment.
+Iterative learned block-refinement experiment.
 
 Motivation:
-    Previous structured-prior experiments showed that block_score_topk can beat
-    CoSaMP in hard block-sparse regimes. This script tests whether a learned
-    block scorer can improve or match that structured-prior baseline.
+    The learned block scorer improves over CoSaMP in hard block-sparse regimes,
+    but the hand-designed block_score_topk baseline remains slightly stronger.
+    This script tests whether iterative residual-based refinement can improve
+    a learned block scorer.
 
 Main idea:
-    Instead of scoring individual coordinates independently, predict which
-    blocks are active, then select coordinates inside the predicted active
-    blocks.
+    1. Train a learned block scorer.
+    2. Initialize active blocks using learned probabilities.
+    3. Refit amplitudes by least squares.
+    4. Compute residual correlations.
+    5. Merge current blocks with high residual-correlation blocks.
+    6. Refit on the merged candidate block support.
+    7. Prune back to k coordinates.
+    8. Repeat.
 
 Methods:
-    - naive top-k correlation + LS
-    - CoSaMP + LS
-    - block_score_topk + LS
-    - learned_block_scorer + LS
-    - oracle support + LS
-
-Default hard regime:
-    n = 256
-    m = 96
-    k = 40
-    block_size = 5
+    - naive top-k
+    - CoSaMP
+    - block_score_topk
+    - learned_block_scorer
+    - iterative_learned_block_refinement
+    - oracle
 
 Outputs:
-    results/learned_block_scorer/<prefix>.json
-    figures/learned_block_scorer/<prefix>_nrmse.png
+    results/iterative_learned_block_refinement/<prefix>.json
+    figures/iterative_learned_block_refinement/<prefix>_nrmse.png
 """
 
 from __future__ import annotations
@@ -43,8 +44,8 @@ import numpy as np
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RESULTS_DIR = ROOT / "results" / "learned_block_scorer"
-FIGURES_DIR = ROOT / "figures" / "learned_block_scorer"
+RESULTS_DIR = ROOT / "results" / "iterative_learned_block_refinement"
+FIGURES_DIR = ROOT / "figures" / "iterative_learned_block_refinement"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -60,12 +61,13 @@ def parse_args():
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--noise-std", type=float, default=0.0)
     p.add_argument("--max-iters", type=int, default=30)
-    p.add_argument("--out-prefix", type=str, default="learned_block_scorer_m96_k40")
+    p.add_argument("--refine-iters", type=int, default=4)
+    p.add_argument("--out-prefix", type=str, default="iterative_learned_block_refinement_m96_k40")
     return p.parse_args()
 
 
 # ---------------------------------------------------------------------
-# Operators and data
+# Data generation
 # ---------------------------------------------------------------------
 
 def normalize_columns(A: np.ndarray, eps: float = 1e-12) -> np.ndarray:
@@ -81,20 +83,17 @@ def make_gaussian_operator(m: int, n: int, seed: int) -> np.ndarray:
 def fill_amplitudes(n: int, support: set[int], rng: np.random.Generator):
     x = np.zeros(n, dtype=np.float64)
     support_list = sorted(support)
-
     amps = rng.uniform(0.5, 2.0, size=len(support_list))
     signs = rng.choice([-1.0, 1.0], size=len(support_list))
     x[support_list] = amps * signs
-
     return x
 
 
 def block_sparse_signal(n: int, k: int, block_size: int, rng: np.random.Generator):
     """
-    Generate an exactly k-sparse signal with full block structure.
+    Exactly k-sparse block-structured signal.
 
-    Uses only full blocks so the final partial block does not create
-    supports smaller than k.
+    Uses only full blocks to avoid the partial-final-block issue.
     """
     n_full_blocks = n // block_size
     blocks_needed = int(np.ceil(k / block_size))
@@ -120,7 +119,6 @@ def block_sparse_signal(n: int, k: int, block_size: int, rng: np.random.Generato
 
     support = set(sorted(support)[:k])
     x = fill_amplitudes(n, support, rng)
-
     return x, support, chosen_blocks
 
 
@@ -131,7 +129,7 @@ def add_noise(y: np.ndarray, noise_std: float, rng: np.random.Generator):
 
 
 # ---------------------------------------------------------------------
-# Metrics and utilities
+# Metrics
 # ---------------------------------------------------------------------
 
 def best_k_support(scores: np.ndarray, k: int) -> set[int]:
@@ -242,19 +240,14 @@ def cosamp(A, y, k, max_iters=30, tol=1e-10):
 
 
 def block_score_topk(A, y, k, block_size=5):
-    """
-    Hand-designed block prior:
-    rank blocks by total correlation energy, then select coordinates
-    inside the strongest blocks.
-    """
     raw = np.abs(A.T @ y)
     n = raw.size
-    n_blocks = int(np.ceil(n / block_size))
+    n_blocks = n // block_size
 
     block_scores = []
     for b in range(n_blocks):
         lo = b * block_size
-        hi = min(n, lo + block_size)
+        hi = lo + block_size
         block_scores.append(float(np.sum(raw[lo:hi] ** 2)))
 
     block_order = np.argsort(block_scores)[::-1]
@@ -262,7 +255,7 @@ def block_score_topk(A, y, k, block_size=5):
     selected = []
     for b in block_order:
         lo = int(b * block_size)
-        hi = min(n, lo + block_size)
+        hi = lo + block_size
         coords = list(range(lo, hi))
         coords = sorted(coords, key=lambda j: raw[j], reverse=True)
 
@@ -279,18 +272,9 @@ def block_score_topk(A, y, k, block_size=5):
 # ---------------------------------------------------------------------
 
 def block_features(A, y, block_size=5):
-    """
-    Create one feature vector per block.
-
-    Features include:
-        - block correlation energy
-        - mean/max/std/sum of absolute correlations in block
-        - neighboring block scores
-        - simple coherence statistics inside block
-    """
     raw = np.abs(A.T @ y)
     n = raw.size
-    n_blocks = int(np.ceil(n / block_size))
+    n_blocks = n // block_size
 
     scale = max(float(np.max(raw)), 1e-12)
     raw_norm = raw / scale
@@ -308,8 +292,7 @@ def block_features(A, y, block_size=5):
 
     for b in range(n_blocks):
         lo = b * block_size
-        hi = min(n, lo + block_size)
-
+        hi = lo + block_size
         vals = raw_norm[lo:hi]
         subG = G[lo:hi, lo:hi]
 
@@ -318,21 +301,11 @@ def block_features(A, y, block_size=5):
         block_max.append(float(np.max(vals)))
         block_std.append(float(np.std(vals)))
         block_sum.append(float(np.sum(vals)))
-
-        if subG.size > 0:
-            block_coh_mean.append(float(np.mean(subG)))
-            block_coh_max.append(float(np.max(subG)))
-        else:
-            block_coh_mean.append(0.0)
-            block_coh_max.append(0.0)
+        block_coh_mean.append(float(np.mean(subG)))
+        block_coh_max.append(float(np.max(subG)))
 
     block_energy = np.asarray(block_energy)
-    block_mean = np.asarray(block_mean)
-    block_max = np.asarray(block_max)
-    block_std = np.asarray(block_std)
     block_sum = np.asarray(block_sum)
-    block_coh_mean = np.asarray(block_coh_mean)
-    block_coh_max = np.asarray(block_coh_max)
 
     feats = []
 
@@ -369,17 +342,14 @@ def train_block_scorer(A, args, rng):
     try:
         from sklearn.ensemble import RandomForestClassifier
     except Exception as e:
-        raise ImportError(
-            "scikit-learn is required. Install with: pip install scikit-learn"
-        ) from e
+        raise ImportError("Install scikit-learn with: pip install scikit-learn") from e
 
     X_all = []
     y_all = []
-
-    n_blocks = int(np.ceil(args.n / args.block_size))
+    n_blocks = args.n // args.block_size
 
     for _ in range(args.n_train):
-        x, S, active_blocks = block_sparse_signal(args.n, args.k, args.block_size, rng)
+        x, _, active_blocks = block_sparse_signal(args.n, args.k, args.block_size, rng)
         y = add_noise(A @ x, args.noise_std, rng)
 
         X = block_features(A, y, args.block_size)
@@ -392,9 +362,6 @@ def train_block_scorer(A, args, rng):
         X_all.append(X)
         y_all.append(labels)
 
-    X_train = np.vstack(X_all)
-    y_train = np.concatenate(y_all)
-
     clf = RandomForestClassifier(
         n_estimators=400,
         max_depth=14,
@@ -403,37 +370,122 @@ def train_block_scorer(A, args, rng):
         random_state=args.seed,
         n_jobs=-1,
     )
-    clf.fit(X_train, y_train)
 
+    clf.fit(np.vstack(X_all), np.concatenate(y_all))
     return clf
 
 
-def learned_block_support(clf, A, y, k, block_size=5):
-    raw = np.abs(A.T @ y)
-    n = raw.size
-    n_blocks = int(np.ceil(n / block_size))
-    blocks_needed = int(np.ceil(k / block_size))
-
+def learned_block_probs(clf, A, y, block_size=5):
     X = block_features(A, y, block_size)
-    probs = clf.predict_proba(X)[:, 1]
+    return clf.predict_proba(X)[:, 1]
 
-    block_order = np.argsort(probs)[::-1]
-    selected_blocks = block_order[:blocks_needed]
+
+def support_from_blocks(A, y, blocks, k, block_size=5, score_vector=None):
+    raw = np.abs(A.T @ y) if score_vector is None else np.abs(score_vector)
+    n = raw.size
 
     selected = []
-    for b in selected_blocks:
+    for b in blocks:
         lo = int(b * block_size)
         hi = min(n, lo + block_size)
-
         coords = list(range(lo, hi))
         coords = sorted(coords, key=lambda j: raw[j], reverse=True)
+        selected.extend(coords)
 
-        for j in coords:
-            selected.append(j)
-
-    # If k is not divisible by block_size, prune within selected blocks by raw score.
     selected = sorted(set(selected), key=lambda j: raw[j], reverse=True)
     return set(int(i) for i in selected[:k])
+
+
+def learned_block_support(clf, A, y, k, block_size=5):
+    probs = learned_block_probs(clf, A, y, block_size)
+    blocks_needed = int(np.ceil(k / block_size))
+    block_order = np.argsort(probs)[::-1]
+    return support_from_blocks(A, y, block_order[:blocks_needed], k, block_size)
+
+
+def iterative_learned_block_refinement(clf, A, y, k, block_size=5, refine_iters=4):
+    """
+    Learned block scorer + CoSaMP-style residual refinement.
+    """
+    n = A.shape[1]
+    n_blocks = n // block_size
+    blocks_needed = int(np.ceil(k / block_size))
+
+    raw = np.abs(A.T @ y)
+    learned_probs = learned_block_probs(clf, A, y, block_size)
+
+    current_blocks = set(np.argsort(learned_probs)[::-1][:blocks_needed])
+    current_support = support_from_blocks(A, y, current_blocks, k, block_size)
+
+    x = support_lstsq(A, y, current_support)
+
+    for _ in range(refine_iters):
+        residual = y - A @ x
+        residual_corr = np.abs(A.T @ residual)
+
+        residual_block_energy = np.zeros(n_blocks)
+        amplitude_block_energy = np.zeros(n_blocks)
+
+        for b in range(n_blocks):
+            lo = b * block_size
+            hi = lo + block_size
+            residual_block_energy[b] = np.sum(residual_corr[lo:hi] ** 2)
+            amplitude_block_energy[b] = np.sum(np.abs(x[lo:hi]) ** 2)
+
+        residual_block_energy /= max(np.max(residual_block_energy), 1e-12)
+        amplitude_block_energy /= max(np.max(amplitude_block_energy), 1e-12)
+
+        # Merge current blocks with learned-probability and residual-correlation candidates.
+        learned_candidates = set(np.argsort(learned_probs)[::-1][:blocks_needed])
+        residual_candidates = set(np.argsort(residual_block_energy)[::-1][:blocks_needed])
+        candidate_blocks = current_blocks | learned_candidates | residual_candidates
+
+        candidate_support = support_from_blocks(
+            A,
+            y,
+            candidate_blocks,
+            min(len(candidate_blocks) * block_size, n),
+            block_size,
+        )
+
+        x_candidate = support_lstsq(A, y, candidate_support)
+
+        candidate_amp_energy = np.zeros(n_blocks)
+        for b in range(n_blocks):
+            lo = b * block_size
+            hi = lo + block_size
+            candidate_amp_energy[b] = np.sum(np.abs(x_candidate[lo:hi]) ** 2)
+
+        candidate_amp_energy /= max(np.max(candidate_amp_energy), 1e-12)
+
+        # Combined score:
+        # learned prior + current amplitude evidence + residual evidence.
+        combined = (
+            0.45 * learned_probs
+            + 0.35 * candidate_amp_energy
+            + 0.20 * residual_block_energy
+        )
+
+        next_blocks = set(np.argsort(combined)[::-1][:blocks_needed])
+        next_support = support_from_blocks(
+            A,
+            y,
+            next_blocks,
+            k,
+            block_size,
+            score_vector=x_candidate,
+        )
+
+        x_next = support_lstsq(A, y, next_support)
+
+        if next_support == current_support:
+            break
+
+        current_blocks = next_blocks
+        current_support = next_support
+        x = x_next
+
+    return current_support
 
 
 # ---------------------------------------------------------------------
@@ -443,14 +495,13 @@ def learned_block_support(clf, A, y, k, block_size=5):
 def main():
     args = parse_args()
     rng = np.random.default_rng(args.seed)
-
-    A = make_gaussian_operator(args.m, args.n, seed=args.seed)
+    A = make_gaussian_operator(args.m, args.n, args.seed)
 
     print("=" * 78)
-    print("Learned block scorer")
+    print("Iterative learned block refinement")
     print("=" * 78)
     print(f"n={args.n}, m={args.m}, k={args.k}, block_size={args.block_size}")
-    print(f"n_train={args.n_train}, n_test={args.n_test}, noise_std={args.noise_std}")
+    print(f"n_train={args.n_train}, n_test={args.n_test}, refine_iters={args.refine_iters}")
 
     print("\nTraining learned block scorer...")
     clf = train_block_scorer(A, args, rng)
@@ -460,6 +511,7 @@ def main():
         "cosamp",
         "block_score_topk",
         "learned_block_scorer",
+        "iterative_refinement",
         "oracle",
     ]
 
@@ -468,7 +520,7 @@ def main():
         for method in methods
     }
 
-    print("\nEvaluating on block-sparse test signals...")
+    print("\nEvaluating...")
 
     for _ in range(args.n_test):
         x_true, S_true, _ = block_sparse_signal(args.n, args.k, args.block_size, rng)
@@ -477,8 +529,16 @@ def main():
         predicted = {
             "naive": naive_topk(A, y, args.k),
             "cosamp": cosamp(A, y, args.k, max_iters=args.max_iters),
-            "block_score_topk": block_score_topk(A, y, args.k, block_size=args.block_size),
-            "learned_block_scorer": learned_block_support(clf, A, y, args.k, block_size=args.block_size),
+            "block_score_topk": block_score_topk(A, y, args.k, args.block_size),
+            "learned_block_scorer": learned_block_support(clf, A, y, args.k, args.block_size),
+            "iterative_refinement": iterative_learned_block_refinement(
+                clf,
+                A,
+                y,
+                args.k,
+                args.block_size,
+                args.refine_iters,
+            ),
             "oracle": S_true,
         }
 
@@ -492,16 +552,15 @@ def main():
         "methods": methods,
         "summary": {},
         "interpretation": (
-            "learned_block_scorer predicts active blocks first, then selects "
-            "coordinates inside the highest-probability blocks. It should be "
-            "compared primarily against block_score_topk and CoSaMP."
+            "iterative_refinement starts from learned block probabilities and "
+            "performs residual-based merge-refit-prune refinement."
         ),
     }
 
     print("\n" + "-" * 78)
-    print("Block-sparse test results")
+    print("Results")
     print("-" * 78)
-    print(f"{'method':<22} {'NRMSE':>18} {'IoU':>18}")
+    print(f"{'method':<24} {'NRMSE':>18} {'IoU':>18}")
 
     for method in methods:
         summary["summary"][method] = {
@@ -513,7 +572,7 @@ def main():
         iou_s = summary["summary"][method]["iou"]
 
         print(
-            f"{method:<22} "
+            f"{method:<24} "
             f"{nrm['mean']:>8.4f} ± {nrm['std']:<7.4f} "
             f"{iou_s['mean']:>8.4f} ± {iou_s['std']:<7.4f}"
         )
@@ -524,8 +583,7 @@ def main():
 
     print(f"\nWrote {out_json}")
 
-    # Plot NRMSE
-    fig, ax = plt.subplots(figsize=(8.0, 4.6))
+    fig, ax = plt.subplots(figsize=(9.0, 4.8))
 
     xs = np.arange(len(methods))
     means = [summary["summary"][m]["nrmse"]["mean"] for m in methods]
@@ -535,25 +593,28 @@ def main():
     ax.set_xticks(xs)
     ax.set_xticklabels(methods, rotation=20)
     ax.set_ylabel("NRMSE")
-    ax.set_title(f"Learned block scorer: m={args.m}, k={args.k}")
+    ax.set_title(f"Iterative learned block refinement: m={args.m}, k={args.k}")
     ax.grid(True, axis="y", alpha=0.3)
     fig.tight_layout()
 
     out_png = FIGURES_DIR / f"{args.out_prefix}_nrmse.png"
     fig.savefig(out_png, dpi=180)
+
     print(f"Wrote {out_png}")
 
-    # Print key gain numbers
-    cosamp_nrmse = summary["summary"]["cosamp"]["nrmse"]["mean"]
-    block_nrmse = summary["summary"]["block_score_topk"]["nrmse"]["mean"]
-    learned_nrmse = summary["summary"]["learned_block_scorer"]["nrmse"]["mean"]
+    cosamp_n = summary["summary"]["cosamp"]["nrmse"]["mean"]
+    block_n = summary["summary"]["block_score_topk"]["nrmse"]["mean"]
+    learned_n = summary["summary"]["learned_block_scorer"]["nrmse"]["mean"]
+    iterative_n = summary["summary"]["iterative_refinement"]["nrmse"]["mean"]
 
     print("\nKey gains:")
-    print(f"  CoSaMP NRMSE              = {cosamp_nrmse:.4f}")
-    print(f"  block_score_topk NRMSE    = {block_nrmse:.4f}")
-    print(f"  learned_block_scorer NRMSE= {learned_nrmse:.4f}")
-    print(f"  gain learned vs CoSaMP    = {cosamp_nrmse - learned_nrmse:+.4f}")
-    print(f"  gain learned vs block     = {block_nrmse - learned_nrmse:+.4f}")
+    print(f"  CoSaMP NRMSE                  = {cosamp_n:.4f}")
+    print(f"  block_score_topk NRMSE        = {block_n:.4f}")
+    print(f"  learned_block_scorer NRMSE    = {learned_n:.4f}")
+    print(f"  iterative_refinement NRMSE    = {iterative_n:.4f}")
+    print(f"  gain iterative vs CoSaMP      = {cosamp_n - iterative_n:+.4f}")
+    print(f"  gain iterative vs block_score = {block_n - iterative_n:+.4f}")
+    print(f"  gain iterative vs learned     = {learned_n - iterative_n:+.4f}")
 
 
 if __name__ == "__main__":

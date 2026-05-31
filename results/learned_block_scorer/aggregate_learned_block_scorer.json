@@ -1,0 +1,43 @@
+{
+  "input_files": [
+    "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/learned_block_scorer/learned_block_scorer_m96_k40_fixed.json",
+    "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/learned_block_scorer/learned_block_scorer_m96_k55_fixed.json"
+  ],
+  "rows": [
+    {
+      "label": "m=96, k=40",
+      "m": 96,
+      "k": 40,
+      "naive_nrmse": 0.8300671670067405,
+      "cosamp_nrmse": 0.6551764493071742,
+      "block_score_topk_nrmse": 0.5769219170708267,
+      "learned_block_scorer_nrmse": 0.5944623293935433,
+      "oracle_nrmse": 1.8561049700143078e-15,
+      "gain_learned_vs_cosamp": 0.06071411991363096,
+      "gain_block_vs_cosamp": 0.07825453223634748,
+      "gain_learned_vs_block": -0.017540412322716525,
+      "cosamp_iou": 0.45782540314907255,
+      "block_score_topk_iou": 0.6116363636363636,
+      "learned_block_scorer_iou": 0.5942305102305102,
+      "oracle_support_size": 40.0
+    },
+    {
+      "label": "m=96, k=55",
+      "m": 96,
+      "k": 55,
+      "naive_nrmse": 0.9216619231609268,
+      "cosamp_nrmse": 0.8265636144305223,
+      "block_score_topk_nrmse": 0.7652029216003441,
+      "learned_block_scorer_nrmse": 0.7759915694017139,
+      "oracle_nrmse": 2.0376202430681093e-15,
+      "gain_learned_vs_cosamp": 0.05057204502880841,
+      "gain_block_vs_cosamp": 0.0613606928301782,
+      "gain_learned_vs_block": -0.010788647801369788,
+      "cosamp_iou": 0.35947528492782754,
+      "block_score_topk_iou": 0.529272031889679,
+      "learned_block_scorer_iou": 0.5141749383514089,
+      "oracle_support_size": 55.0
+    }
+  ],
+  "interpretation": "Positive gain_learned_vs_cosamp means learned_block_scorer has lower NRMSE than CoSaMP. Positive gain_learned_vs_block means learned_block_scorer has lower NRMSE than the hand-designed block_score_topk baseline."
+}
