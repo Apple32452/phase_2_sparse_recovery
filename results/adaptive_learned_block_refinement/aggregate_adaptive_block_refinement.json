@@ -1,0 +1,833 @@
+{
+  "rows": [
+    {
+      "setting": "m=96,k=40",
+      "seed": "seed0",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/adaptive_learned_block_refinement/adaptive_learned_block_refinement_m96_k40.json",
+      "m": 96,
+      "k": 40,
+      "n_test": 300,
+      "change_weight": 0.05,
+      "min_improvement": 0.0001,
+      "adaptive_steps_mean": 1.5133333333333334,
+      "adaptive_steps_std": 0.5743015081141806,
+      "adaptive_steps_median": 2.0,
+      "cosamp_nrmse": 0.6508605285784995,
+      "cosamp_iou": 0.4614230143958633,
+      "cosamp_support_size": 40.0,
+      "block_score_topk_nrmse": 0.5702829858819266,
+      "block_score_topk_iou": 0.6171882931882932,
+      "block_score_topk_support_size": 40.0,
+      "learned_block_scorer_nrmse": 0.5750059331955509,
+      "learned_block_scorer_iou": 0.6132371332371332,
+      "learned_block_scorer_support_size": 40.0,
+      "one_step_refinement_nrmse": 0.07753271839885333,
+      "one_step_refinement_iou": 0.9503299663299662,
+      "one_step_refinement_support_size": 40.0,
+      "fixed_iterative_refinement_nrmse": 0.2168101208064788,
+      "fixed_iterative_refinement_iou": 0.8719595959595957,
+      "fixed_iterative_refinement_support_size": 40.0,
+      "adaptive_refinement_nrmse": 0.054044590955106234,
+      "adaptive_refinement_iou": 0.9651851851851854,
+      "adaptive_refinement_support_size": 40.0,
+      "oracle_nrmse": 1.832214690437398e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 40.0,
+      "gain_adaptive_vs_cosamp": 0.5968159376233932,
+      "gain_adaptive_vs_block_score_topk": 0.5162383949268203,
+      "gain_adaptive_vs_learned_block_scorer": 0.5209613422404447,
+      "gain_adaptive_vs_one_step_refinement": 0.023488127443747092,
+      "gain_adaptive_vs_fixed_iterative_refinement": 0.16276552985137255
+    },
+    {
+      "setting": "m=96,k=40",
+      "seed": "seed1",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/adaptive_learned_block_refinement/adaptive_learned_block_refinement_m96_k40_seed1.json",
+      "m": 96,
+      "k": 40,
+      "n_test": 300,
+      "change_weight": 0.05,
+      "min_improvement": 0.0001,
+      "adaptive_steps_mean": 1.4966666666666666,
+      "adaptive_steps_std": 0.6244909037679323,
+      "adaptive_steps_median": 2.0,
+      "cosamp_nrmse": 0.6675248469392315,
+      "cosamp_iou": 0.44834790200013996,
+      "cosamp_support_size": 40.0,
+      "block_score_topk_nrmse": 0.5740438440168022,
+      "block_score_topk_iou": 0.6120082880082879,
+      "block_score_topk_support_size": 40.0,
+      "learned_block_scorer_nrmse": 0.5728378201000951,
+      "learned_block_scorer_iou": 0.6154343434343434,
+      "learned_block_scorer_support_size": 40.0,
+      "one_step_refinement_nrmse": 0.08880421635734646,
+      "one_step_refinement_iou": 0.940996632996633,
+      "one_step_refinement_support_size": 40.0,
+      "fixed_iterative_refinement_nrmse": 0.21057707941920334,
+      "fixed_iterative_refinement_iou": 0.872996632996633,
+      "fixed_iterative_refinement_support_size": 40.0,
+      "adaptive_refinement_nrmse": 0.06775998100113152,
+      "adaptive_refinement_iou": 0.9549225589225592,
+      "adaptive_refinement_support_size": 40.0,
+      "oracle_nrmse": 1.881366590028595e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 40.0,
+      "gain_adaptive_vs_cosamp": 0.5997648659381,
+      "gain_adaptive_vs_block_score_topk": 0.5062838630156706,
+      "gain_adaptive_vs_learned_block_scorer": 0.5050778390989635,
+      "gain_adaptive_vs_one_step_refinement": 0.02104423535621494,
+      "gain_adaptive_vs_fixed_iterative_refinement": 0.14281709841807183
+    },
+    {
+      "setting": "m=96,k=40",
+      "seed": "seed2",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/adaptive_learned_block_refinement/adaptive_learned_block_refinement_m96_k40_seed2.json",
+      "m": 96,
+      "k": 40,
+      "n_test": 300,
+      "change_weight": 0.05,
+      "min_improvement": 0.0001,
+      "adaptive_steps_mean": 1.49,
+      "adaptive_steps_std": 0.619058424814115,
+      "adaptive_steps_median": 1.0,
+      "cosamp_nrmse": 0.6720318221664052,
+      "cosamp_iou": 0.44282193462399166,
+      "cosamp_support_size": 40.0,
+      "block_score_topk_nrmse": 0.5918751133293321,
+      "block_score_topk_iou": 0.6036581196581197,
+      "block_score_topk_support_size": 40.0,
+      "learned_block_scorer_nrmse": 0.6007235142115745,
+      "learned_block_scorer_iou": 0.592043512043512,
+      "learned_block_scorer_support_size": 40.0,
+      "one_step_refinement_nrmse": 0.11817768779396862,
+      "one_step_refinement_iou": 0.9217912457912458,
+      "one_step_refinement_support_size": 40.0,
+      "fixed_iterative_refinement_nrmse": 0.23717567068325318,
+      "fixed_iterative_refinement_iou": 0.8590303030303029,
+      "fixed_iterative_refinement_support_size": 40.0,
+      "adaptive_refinement_nrmse": 0.07068837866010994,
+      "adaptive_refinement_iou": 0.9538047138047138,
+      "adaptive_refinement_support_size": 40.0,
+      "oracle_nrmse": 1.839274891587978e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 40.0,
+      "gain_adaptive_vs_cosamp": 0.6013434435062953,
+      "gain_adaptive_vs_block_score_topk": 0.5211867346692222,
+      "gain_adaptive_vs_learned_block_scorer": 0.5300351355514646,
+      "gain_adaptive_vs_one_step_refinement": 0.04748930913385868,
+      "gain_adaptive_vs_fixed_iterative_refinement": 0.16648729202314325
+    },
+    {
+      "setting": "m=96,k=55",
+      "seed": "seed0",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/adaptive_learned_block_refinement/adaptive_learned_block_refinement_m96_k55.json",
+      "m": 96,
+      "k": 55,
+      "n_test": 300,
+      "change_weight": 0.05,
+      "min_improvement": 0.0001,
+      "adaptive_steps_mean": 1.4766666666666666,
+      "adaptive_steps_std": 0.7457360271719626,
+      "adaptive_steps_median": 1.0,
+      "cosamp_nrmse": 0.8269175418720687,
+      "cosamp_iou": 0.36124514738272284,
+      "cosamp_support_size": 55.0,
+      "block_score_topk_nrmse": 0.7677843382323052,
+      "block_score_topk_iou": 0.5277691529603294,
+      "block_score_topk_support_size": 55.0,
+      "learned_block_scorer_nrmse": 0.7708909538961948,
+      "learned_block_scorer_iou": 0.5262805489717255,
+      "learned_block_scorer_support_size": 55.0,
+      "one_step_refinement_nrmse": 0.4255398592903725,
+      "one_step_refinement_iou": 0.7708380437645143,
+      "one_step_refinement_support_size": 55.0,
+      "fixed_iterative_refinement_nrmse": 0.4371703160237656,
+      "fixed_iterative_refinement_iou": 0.7713545572074983,
+      "fixed_iterative_refinement_support_size": 55.0,
+      "adaptive_refinement_nrmse": 0.3665497703788997,
+      "adaptive_refinement_iou": 0.8032951052215758,
+      "adaptive_refinement_support_size": 55.0,
+      "oracle_nrmse": 2.0655752455349392e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 55.0,
+      "gain_adaptive_vs_cosamp": 0.460367771493169,
+      "gain_adaptive_vs_block_score_topk": 0.4012345678534055,
+      "gain_adaptive_vs_learned_block_scorer": 0.4043411835172951,
+      "gain_adaptive_vs_one_step_refinement": 0.05899008891147284,
+      "gain_adaptive_vs_fixed_iterative_refinement": 0.07062054564486592
+    },
+    {
+      "setting": "m=96,k=55",
+      "seed": "seed1",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/adaptive_learned_block_refinement/adaptive_learned_block_refinement_m96_k55_seed1.json",
+      "m": 96,
+      "k": 55,
+      "n_test": 300,
+      "change_weight": 0.05,
+      "min_improvement": 0.0001,
+      "adaptive_steps_mean": 1.46,
+      "adaptive_steps_std": 0.7083313725463056,
+      "adaptive_steps_median": 1.0,
+      "cosamp_nrmse": 0.8325223403473903,
+      "cosamp_iou": 0.3574946148115375,
+      "cosamp_support_size": 55.0,
+      "block_score_topk_nrmse": 0.7651991107963155,
+      "block_score_topk_iou": 0.5274093466446408,
+      "block_score_topk_support_size": 55.0,
+      "learned_block_scorer_nrmse": 0.772734042140881,
+      "learned_block_scorer_iou": 0.5168424653262114,
+      "learned_block_scorer_support_size": 55.0,
+      "one_step_refinement_nrmse": 0.43598958595440146,
+      "one_step_refinement_iou": 0.7667645801910508,
+      "one_step_refinement_support_size": 55.0,
+      "fixed_iterative_refinement_nrmse": 0.460055373535825,
+      "fixed_iterative_refinement_iou": 0.7552091607223186,
+      "fixed_iterative_refinement_support_size": 55.0,
+      "adaptive_refinement_nrmse": 0.3821664709439357,
+      "adaptive_refinement_iou": 0.7986321015585721,
+      "adaptive_refinement_support_size": 55.0,
+      "oracle_nrmse": 2.0824088759071317e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 55.0,
+      "gain_adaptive_vs_cosamp": 0.45035586940345457,
+      "gain_adaptive_vs_block_score_topk": 0.38303263985237984,
+      "gain_adaptive_vs_learned_block_scorer": 0.39056757119694535,
+      "gain_adaptive_vs_one_step_refinement": 0.05382311501046577,
+      "gain_adaptive_vs_fixed_iterative_refinement": 0.0778889025918893
+    },
+    {
+      "setting": "m=96,k=55",
+      "seed": "seed2",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/adaptive_learned_block_refinement/adaptive_learned_block_refinement_m96_k55_seed2.json",
+      "m": 96,
+      "k": 55,
+      "n_test": 300,
+      "change_weight": 0.05,
+      "min_improvement": 0.0001,
+      "adaptive_steps_mean": 1.38,
+      "adaptive_steps_std": 0.7039886362719217,
+      "adaptive_steps_median": 1.0,
+      "cosamp_nrmse": 0.8396581565574892,
+      "cosamp_iou": 0.35729164646240874,
+      "cosamp_support_size": 55.0,
+      "block_score_topk_nrmse": 0.7677376244856254,
+      "block_score_topk_iou": 0.5244598027245085,
+      "block_score_topk_support_size": 55.0,
+      "learned_block_scorer_nrmse": 0.7891500924536864,
+      "learned_block_scorer_iou": 0.5114721324427207,
+      "learned_block_scorer_support_size": 55.0,
+      "one_step_refinement_nrmse": 0.45245814491737585,
+      "one_step_refinement_iou": 0.7530894383394383,
+      "one_step_refinement_support_size": 55.0,
+      "fixed_iterative_refinement_nrmse": 0.47153737843962196,
+      "fixed_iterative_refinement_iou": 0.752535409035409,
+      "fixed_iterative_refinement_support_size": 55.0,
+      "adaptive_refinement_nrmse": 0.4167064368258299,
+      "adaptive_refinement_iou": 0.7782511491776197,
+      "adaptive_refinement_support_size": 55.0,
+      "oracle_nrmse": 2.0427315364047255e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 55.0,
+      "gain_adaptive_vs_cosamp": 0.4229517197316593,
+      "gain_adaptive_vs_block_score_topk": 0.3510311876597955,
+      "gain_adaptive_vs_learned_block_scorer": 0.3724436556278565,
+      "gain_adaptive_vs_one_step_refinement": 0.03575170809154593,
+      "gain_adaptive_vs_fixed_iterative_refinement": 0.05483094161379204
+    }
+  ],
+  "summary": {
+    "m=96,k=40": {
+      "n_seeds": 3,
+      "methods": {
+        "cosamp": {
+          "nrmse": {
+            "mean": 0.6634723992280455,
+            "std": 0.009105773530577451,
+            "se": 0.00525722079905866,
+            "values": [
+              0.6508605285784995,
+              0.6675248469392315,
+              0.6720318221664052
+            ]
+          },
+          "iou": {
+            "mean": 0.45086428367333165,
+            "std": 0.007799537367210285,
+            "se": 0.004503064998513403,
+            "values": [
+              0.4614230143958633,
+              0.44834790200013996,
+              0.44282193462399166
+            ]
+          },
+          "support_size": {
+            "mean": 40.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              40.0,
+              40.0,
+              40.0
+            ]
+          }
+        },
+        "block_score_topk": {
+          "nrmse": {
+            "mean": 0.5787339810760203,
+            "std": 0.009418175023217549,
+            "se": 0.005437585884929662,
+            "values": [
+              0.5702829858819266,
+              0.5740438440168022,
+              0.5918751133293321
+            ]
+          },
+          "iou": {
+            "mean": 0.6109515669515669,
+            "std": 0.005573980832579172,
+            "se": 0.0032181393341473995,
+            "values": [
+              0.6171882931882932,
+              0.6120082880082879,
+              0.6036581196581197
+            ]
+          },
+          "support_size": {
+            "mean": 40.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              40.0,
+              40.0,
+              40.0
+            ]
+          }
+        },
+        "learned_block_scorer": {
+          "nrmse": {
+            "mean": 0.5828557558357402,
+            "std": 0.012665379863538002,
+            "se": 0.007312360473602532,
+            "values": [
+              0.5750059331955509,
+              0.5728378201000951,
+              0.6007235142115745
+            ]
+          },
+          "iou": {
+            "mean": 0.6069049962383296,
+            "std": 0.01054687054745909,
+            "se": 0.006089238549683642,
+            "values": [
+              0.6132371332371332,
+              0.6154343434343434,
+              0.592043512043512
+            ]
+          },
+          "support_size": {
+            "mean": 40.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              40.0,
+              40.0,
+              40.0
+            ]
+          }
+        },
+        "one_step_refinement": {
+          "nrmse": {
+            "mean": 0.0948382075167228,
+            "std": 0.017133012408136493,
+            "se": 0.009891749325866802,
+            "values": [
+              0.07753271839885333,
+              0.08880421635734646,
+              0.11817768779396862
+            ]
+          },
+          "iou": {
+            "mean": 0.937705948372615,
+            "std": 0.011880967874935025,
+            "se": 0.006859480000827033,
+            "values": [
+              0.9503299663299662,
+              0.940996632996633,
+              0.9217912457912458
+            ]
+          },
+          "support_size": {
+            "mean": 40.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              40.0,
+              40.0,
+              40.0
+            ]
+          }
+        },
+        "fixed_iterative_refinement": {
+          "nrmse": {
+            "mean": 0.2215209569696451,
+            "std": 0.011358264166827128,
+            "se": 0.006557696874244523,
+            "values": [
+              0.2168101208064788,
+              0.21057707941920334,
+              0.23717567068325318
+            ]
+          },
+          "iou": {
+            "mean": 0.8679955106621772,
+            "std": 0.006353480535161258,
+            "se": 0.0036681836972664,
+            "values": [
+              0.8719595959595957,
+              0.872996632996633,
+              0.8590303030303029
+            ]
+          },
+          "support_size": {
+            "mean": 40.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              40.0,
+              40.0,
+              40.0
+            ]
+          }
+        },
+        "adaptive_refinement": {
+          "nrmse": {
+            "mean": 0.06416431687211589,
+            "std": 0.007254907198525486,
+            "se": 0.004188622624014443,
+            "values": [
+              0.054044590955106234,
+              0.06775998100113152,
+              0.07068837866010994
+            ]
+          },
+          "iou": {
+            "mean": 0.9579708193041528,
+            "std": 0.005121698984121588,
+            "se": 0.002957014287190832,
+            "values": [
+              0.9651851851851854,
+              0.9549225589225592,
+              0.9538047138047138
+            ]
+          },
+          "support_size": {
+            "mean": 40.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              40.0,
+              40.0,
+              40.0
+            ]
+          }
+        },
+        "oracle": {
+          "nrmse": {
+            "mean": 1.8509520573513236e-15,
+            "std": 2.1698609149809027e-17,
+            "se": 1.252769783368272e-17,
+            "values": [
+              1.832214690437398e-15,
+              1.881366590028595e-15,
+              1.839274891587978e-15
+            ]
+          },
+          "iou": {
+            "mean": 1.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "support_size": {
+            "mean": 40.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              40.0,
+              40.0,
+              40.0
+            ]
+          }
+        }
+      },
+      "gains": {
+        "gain_adaptive_vs_cosamp": {
+          "label": "adaptive vs CoSaMP",
+          "mean": 0.5993080823559295,
+          "std": 0.0018763556540332066,
+          "se": 0.0010833144419515482,
+          "values": [
+            0.5968159376233932,
+            0.5997648659381,
+            0.6013434435062953
+          ]
+        },
+        "gain_adaptive_vs_block_score_topk": {
+          "label": "adaptive vs block_score",
+          "mean": 0.5145696642039043,
+          "std": 0.006197439931119954,
+          "se": 0.0035780936125186413,
+          "values": [
+            0.5162383949268203,
+            0.5062838630156706,
+            0.5211867346692222
+          ]
+        },
+        "gain_adaptive_vs_learned_block_scorer": {
+          "label": "adaptive vs learned_block",
+          "mean": 0.5186914389636242,
+          "std": 0.010314423791277146,
+          "se": 0.005955035352429741,
+          "values": [
+            0.5209613422404447,
+            0.5050778390989635,
+            0.5300351355514646
+          ]
+        },
+        "gain_adaptive_vs_one_step_refinement": {
+          "label": "adaptive vs one_step",
+          "mean": 0.030673890644606905,
+          "std": 0.01193208214186662,
+          "se": 0.006888990836599419,
+          "values": [
+            0.023488127443747092,
+            0.02104423535621494,
+            0.04748930913385868
+          ]
+        },
+        "gain_adaptive_vs_fixed_iterative_refinement": {
+          "label": "adaptive vs fixed_iterative",
+          "mean": 0.15735664009752923,
+          "std": 0.010392676350915406,
+          "se": 0.006000214488801668,
+          "values": [
+            0.16276552985137255,
+            0.14281709841807183,
+            0.16648729202314325
+          ]
+        }
+      },
+      "adaptive_steps": {
+        "mean": 1.5,
+        "std": 0.009813067629253214,
+        "se": 0.005665577237325346,
+        "values": [
+          1.5133333333333334,
+          1.4966666666666666,
+          1.49
+        ]
+      }
+    },
+    "m=96,k=55": {
+      "n_seeds": 3,
+      "methods": {
+        "cosamp": {
+          "nrmse": {
+            "mean": 0.833032679592316,
+            "std": 0.005213837374351188,
+            "se": 0.00301021041159259,
+            "values": [
+              0.8269175418720687,
+              0.8325223403473903,
+              0.8396581565574892
+            ]
+          },
+          "iou": {
+            "mean": 0.3586771362188897,
+            "std": 0.0018177476980897325,
+            "se": 0.0010494771228109297,
+            "values": [
+              0.36124514738272284,
+              0.3574946148115375,
+              0.35729164646240874
+            ]
+          },
+          "support_size": {
+            "mean": 55.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              55.0,
+              55.0,
+              55.0
+            ]
+          }
+        },
+        "block_score_topk": {
+          "nrmse": {
+            "mean": 0.7669070245047487,
+            "std": 0.0012078279320396367,
+            "se": 0.0006973397816978334,
+            "values": [
+              0.7677843382323052,
+              0.7651991107963155,
+              0.7677376244856254
+            ]
+          },
+          "iou": {
+            "mean": 0.526546100776493,
+            "std": 0.001482530453310092,
+            "se": 0.0008559393563003996,
+            "values": [
+              0.5277691529603294,
+              0.5274093466446408,
+              0.5244598027245085
+            ]
+          },
+          "support_size": {
+            "mean": 55.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              55.0,
+              55.0,
+              55.0
+            ]
+          }
+        },
+        "learned_block_scorer": {
+          "nrmse": {
+            "mean": 0.7775916961635874,
+            "std": 0.008207583370219509,
+            "se": 0.0047386504681925295,
+            "values": [
+              0.7708909538961948,
+              0.772734042140881,
+              0.7891500924536864
+            ]
+          },
+          "iou": {
+            "mean": 0.5181983822468859,
+            "std": 0.006121066521772929,
+            "se": 0.003533999404073207,
+            "values": [
+              0.5262805489717255,
+              0.5168424653262114,
+              0.5114721324427207
+            ]
+          },
+          "support_size": {
+            "mean": 55.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              55.0,
+              55.0,
+              55.0
+            ]
+          }
+        },
+        "one_step_refinement": {
+          "nrmse": {
+            "mean": 0.4379958633873833,
+            "std": 0.011080535099227008,
+            "se": 0.00639734992230381,
+            "values": [
+              0.4255398592903725,
+              0.43598958595440146,
+              0.45245814491737585
+            ]
+          },
+          "iou": {
+            "mean": 0.7635640207650011,
+            "std": 0.007591044465399795,
+            "se": 0.004382691565528991,
+            "values": [
+              0.7708380437645143,
+              0.7667645801910508,
+              0.7530894383394383
+            ]
+          },
+          "support_size": {
+            "mean": 55.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              55.0,
+              55.0,
+              55.0
+            ]
+          }
+        },
+        "fixed_iterative_refinement": {
+          "nrmse": {
+            "mean": 0.45625435599973746,
+            "std": 0.014285413201492748,
+            "se": 0.008247687157366871,
+            "values": [
+              0.4371703160237656,
+              0.460055373535825,
+              0.47153737843962196
+            ]
+          },
+          "iou": {
+            "mean": 0.7596997089884087,
+            "std": 0.008313196428102586,
+            "se": 0.004799626195591264,
+            "values": [
+              0.7713545572074983,
+              0.7552091607223186,
+              0.752535409035409
+            ]
+          },
+          "support_size": {
+            "mean": 55.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              55.0,
+              55.0,
+              55.0
+            ]
+          }
+        },
+        "adaptive_refinement": {
+          "nrmse": {
+            "mean": 0.3884742260495551,
+            "std": 0.020956520514651363,
+            "se": 0.012099252760411879,
+            "values": [
+              0.3665497703788997,
+              0.3821664709439357,
+              0.4167064368258299
+            ]
+          },
+          "iou": {
+            "mean": 0.7933927853192558,
+            "std": 0.010874672702341368,
+            "se": 0.006278495212045864,
+            "values": [
+              0.8032951052215758,
+              0.7986321015585721,
+              0.7782511491776197
+            ]
+          },
+          "support_size": {
+            "mean": 55.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              55.0,
+              55.0,
+              55.0
+            ]
+          }
+        },
+        "oracle": {
+          "nrmse": {
+            "mean": 2.0635718859489324e-15,
+            "std": 1.6260030847048154e-17,
+            "se": 9.38773318657487e-18,
+            "values": [
+              2.0655752455349392e-15,
+              2.0824088759071317e-15,
+              2.0427315364047255e-15
+            ]
+          },
+          "iou": {
+            "mean": 1.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "support_size": {
+            "mean": 55.0,
+            "std": 0.0,
+            "se": 0.0,
+            "values": [
+              55.0,
+              55.0,
+              55.0
+            ]
+          }
+        }
+      },
+      "gains": {
+        "gain_adaptive_vs_cosamp": {
+          "label": "adaptive vs CoSaMP",
+          "mean": 0.4445584535427609,
+          "std": 0.015815556800217515,
+          "se": 0.009131115975989399,
+          "values": [
+            0.460367771493169,
+            0.45035586940345457,
+            0.4229517197316593
+          ]
+        },
+        "gain_adaptive_vs_block_score_topk": {
+          "label": "adaptive vs block_score",
+          "mean": 0.3784327984551936,
+          "std": 0.020751927643402012,
+          "se": 0.011981131011121788,
+          "values": [
+            0.4012345678534055,
+            0.38303263985237984,
+            0.3510311876597955
+          ]
+        },
+        "gain_adaptive_vs_learned_block_scorer": {
+          "label": "adaptive vs learned_block",
+          "mean": 0.3891174701140323,
+          "std": 0.01306241851591498,
+          "se": 0.007541590846431066,
+          "values": [
+            0.4043411835172951,
+            0.39056757119694535,
+            0.3724436556278565
+          ]
+        },
+        "gain_adaptive_vs_one_step_refinement": {
+          "label": "adaptive vs one_step",
+          "mean": 0.04952163733782818,
+          "std": 0.009962684323987402,
+          "se": 0.0057519584763053916,
+          "values": [
+            0.05899008891147284,
+            0.05382311501046577,
+            0.03575170809154593
+          ]
+        },
+        "gain_adaptive_vs_fixed_iterative_refinement": {
+          "label": "adaptive vs fixed_iterative",
+          "mean": 0.06778012995018241,
+          "std": 0.009625257125771315,
+          "se": 0.005557144792583433,
+          "values": [
+            0.07062054564486592,
+            0.0778889025918893,
+            0.05483094161379204
+          ]
+        }
+      },
+      "adaptive_steps": {
+        "mean": 1.4388888888888889,
+        "std": 0.04219297232455007,
+        "se": 0.024360123929489413,
+        "values": [
+          1.4766666666666666,
+          1.46,
+          1.38
+        ]
+      }
+    }
+  },
+  "interpretation": "Adaptive refinement is aggregated across seeds. Error bars in plots use standard error across seeds. Positive gains mean adaptive_refinement has lower NRMSE than the baseline."
+}
