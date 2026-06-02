@@ -1,0 +1,188 @@
+{
+  "config": {
+    "n": 256,
+    "m": 96,
+    "k": 40,
+    "block_size": 5,
+    "n_train": 1000,
+    "n_test": 300,
+    "seed": 1,
+    "noise_std": 0.0,
+    "max_iters": 30,
+    "refine_iters": 4,
+    "out_prefix": "iterative_learned_block_refinement_m96_k40_seed1"
+  },
+  "methods": [
+    "naive",
+    "cosamp",
+    "block_score_topk",
+    "learned_block_scorer",
+    "iterative_refinement",
+    "oracle"
+  ],
+  "summary": {
+    "naive": {
+      "nrmse": {
+        "mean": 0.8277408053030395,
+        "std": 0.06614966598630112,
+        "median": 0.8316660099688509
+      },
+      "iou": {
+        "mean": 0.2889275395845497,
+        "std": 0.04420376276036523,
+        "median": 0.2903225806451613
+      },
+      "precision": {
+        "mean": 0.44649999999999995,
+        "std": 0.05319226134191577,
+        "median": 0.45
+      },
+      "recall": {
+        "mean": 0.44649999999999995,
+        "std": 0.05319226134191577,
+        "median": 0.45
+      },
+      "support_size": {
+        "mean": 40.0,
+        "std": 0.0,
+        "median": 40.0
+      }
+    },
+    "cosamp": {
+      "nrmse": {
+        "mean": 0.6741348704916249,
+        "std": 0.1608053590270887,
+        "median": 0.6930247523650954
+      },
+      "iou": {
+        "mean": 0.444386161385544,
+        "std": 0.11877970813093205,
+        "median": 0.42857142857142855
+      },
+      "precision": {
+        "mean": 0.60625,
+        "std": 0.11096405198681838,
+        "median": 0.6
+      },
+      "recall": {
+        "mean": 0.60625,
+        "std": 0.11096405198681838,
+        "median": 0.6
+      },
+      "support_size": {
+        "mean": 40.0,
+        "std": 0.0,
+        "median": 40.0
+      }
+    },
+    "block_score_topk": {
+      "nrmse": {
+        "mean": 0.5809296581486135,
+        "std": 0.155565586709335,
+        "median": 0.5934249525970703
+      },
+      "iou": {
+        "mean": 0.6065993265993265,
+        "std": 0.1387747270841492,
+        "median": 0.6
+      },
+      "precision": {
+        "mean": 0.7458333333333333,
+        "std": 0.1084134319271474,
+        "median": 0.75
+      },
+      "recall": {
+        "mean": 0.7458333333333333,
+        "std": 0.1084134319271474,
+        "median": 0.75
+      },
+      "support_size": {
+        "mean": 40.0,
+        "std": 0.0,
+        "median": 40.0
+      }
+    },
+    "learned_block_scorer": {
+      "nrmse": {
+        "mean": 0.5988358662808673,
+        "std": 0.14495007095291532,
+        "median": 0.609749461205753
+      },
+      "iou": {
+        "mean": 0.5928298368298367,
+        "std": 0.13367314518594858,
+        "median": 0.6
+      },
+      "precision": {
+        "mean": 0.7354166666666667,
+        "std": 0.10726638051546666,
+        "median": 0.75
+      },
+      "recall": {
+        "mean": 0.7354166666666667,
+        "std": 0.10726638051546666,
+        "median": 0.75
+      },
+      "support_size": {
+        "mean": 40.0,
+        "std": 0.0,
+        "median": 40.0
+      }
+    },
+    "iterative_refinement": {
+      "nrmse": {
+        "mean": 0.22510144194321158,
+        "std": 0.21652673456345453,
+        "median": 0.3191286727183138
+      },
+      "iou": {
+        "mean": 0.864107744107744,
+        "std": 0.13507477534594392,
+        "median": 0.7777777777777778
+      },
+      "precision": {
+        "mean": 0.92125,
+        "std": 0.08098675303200312,
+        "median": 0.875
+      },
+      "recall": {
+        "mean": 0.92125,
+        "std": 0.08098675303200312,
+        "median": 0.875
+      },
+      "support_size": {
+        "mean": 40.0,
+        "std": 0.0,
+        "median": 40.0
+      }
+    },
+    "oracle": {
+      "nrmse": {
+        "mean": 1.887131353608625e-15,
+        "std": 5.13950299655797e-16,
+        "median": 1.7359360057814084e-15
+      },
+      "iou": {
+        "mean": 1.0,
+        "std": 0.0,
+        "median": 1.0
+      },
+      "precision": {
+        "mean": 1.0,
+        "std": 0.0,
+        "median": 1.0
+      },
+      "recall": {
+        "mean": 1.0,
+        "std": 0.0,
+        "median": 1.0
+      },
+      "support_size": {
+        "mean": 40.0,
+        "std": 0.0,
+        "median": 40.0
+      }
+    }
+  },
+  "interpretation": "iterative_refinement starts from learned block probabilities and performs residual-based merge-refit-prune refinement."
+}

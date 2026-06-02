@@ -1,0 +1,449 @@
+{
+  "seed_rows": [
+    {
+      "setting": "m=96,k=40",
+      "seed": "seed0",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k40_iter1.json",
+      "k": 40,
+      "m": 96,
+      "refine_iters": 1,
+      "naive_nrmse": 0.8300671670067405,
+      "naive_iou": 0.2884623434336059,
+      "naive_support_size": 40.0,
+      "cosamp_nrmse": 0.6551764493071742,
+      "cosamp_iou": 0.45782540314907255,
+      "cosamp_support_size": 40.0,
+      "block_score_topk_nrmse": 0.5769219170708267,
+      "block_score_topk_iou": 0.6116363636363636,
+      "block_score_topk_support_size": 40.0,
+      "learned_block_scorer_nrmse": 0.5918468387806659,
+      "learned_block_scorer_iou": 0.5957689717689718,
+      "learned_block_scorer_support_size": 40.0,
+      "iterative_refinement_nrmse": 0.11140534627228983,
+      "iterative_refinement_iou": 0.9302222222222222,
+      "iterative_refinement_support_size": 40.0,
+      "oracle_nrmse": 1.8561049700143078e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 40.0,
+      "gain_iterative_vs_cosamp": 0.5437711030348844,
+      "gain_iterative_vs_block_score": 0.4655165707985369,
+      "gain_iterative_vs_learned": 0.4804414925083761
+    },
+    {
+      "setting": "m=96,k=40",
+      "seed": "seed1",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k40_seed1_iter1.json",
+      "k": 40,
+      "m": 96,
+      "refine_iters": 1,
+      "naive_nrmse": 0.8277408053030395,
+      "naive_iou": 0.2889275395845497,
+      "naive_support_size": 40.0,
+      "cosamp_nrmse": 0.6741348704916249,
+      "cosamp_iou": 0.444386161385544,
+      "cosamp_support_size": 40.0,
+      "block_score_topk_nrmse": 0.5809296581486135,
+      "block_score_topk_iou": 0.6065993265993265,
+      "block_score_topk_support_size": 40.0,
+      "learned_block_scorer_nrmse": 0.5988358662808673,
+      "learned_block_scorer_iou": 0.5928298368298367,
+      "learned_block_scorer_support_size": 40.0,
+      "iterative_refinement_nrmse": 0.11042149763870045,
+      "iterative_refinement_iou": 0.9295488215488216,
+      "iterative_refinement_support_size": 40.0,
+      "oracle_nrmse": 1.887131353608625e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 40.0,
+      "gain_iterative_vs_cosamp": 0.5637133728529244,
+      "gain_iterative_vs_block_score": 0.47050816050991306,
+      "gain_iterative_vs_learned": 0.4884143686421668
+    },
+    {
+      "setting": "m=96,k=40",
+      "seed": "seed2",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k40_seed2_iter1.json",
+      "k": 40,
+      "m": 96,
+      "refine_iters": 1,
+      "naive_nrmse": 0.824601125363672,
+      "naive_iou": 0.29158053003262147,
+      "naive_support_size": 40.0,
+      "cosamp_nrmse": 0.6572039957840694,
+      "cosamp_iou": 0.4580173062640713,
+      "cosamp_support_size": 40.0,
+      "block_score_topk_nrmse": 0.5638407819676348,
+      "block_score_topk_iou": 0.6226127946127946,
+      "block_score_topk_support_size": 40.0,
+      "learned_block_scorer_nrmse": 0.5959861888908783,
+      "learned_block_scorer_iou": 0.5967169127169126,
+      "learned_block_scorer_support_size": 40.0,
+      "iterative_refinement_nrmse": 0.11425122400753471,
+      "iterative_refinement_iou": 0.9272053872053873,
+      "iterative_refinement_support_size": 40.0,
+      "oracle_nrmse": 1.886181271209135e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 40.0,
+      "gain_iterative_vs_cosamp": 0.5429527717765347,
+      "gain_iterative_vs_block_score": 0.44958955796010003,
+      "gain_iterative_vs_learned": 0.48173496488334355
+    },
+    {
+      "setting": "m=96,k=55",
+      "seed": "seed0",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k55_iter1.json",
+      "k": 55,
+      "m": 96,
+      "refine_iters": 1,
+      "naive_nrmse": 0.9216619231609268,
+      "naive_iou": 0.28395831791167997,
+      "naive_support_size": 55.0,
+      "cosamp_nrmse": 0.8265636144305223,
+      "cosamp_iou": 0.35947528492782754,
+      "cosamp_support_size": 55.0,
+      "block_score_topk_nrmse": 0.7651855795091766,
+      "block_score_topk_iou": 0.529357501975149,
+      "block_score_topk_support_size": 55.0,
+      "learned_block_scorer_nrmse": 0.7765311638829437,
+      "learned_block_scorer_iou": 0.514992847566377,
+      "learned_block_scorer_support_size": 55.0,
+      "iterative_refinement_nrmse": 0.41769300922755637,
+      "iterative_refinement_iou": 0.767165230194642,
+      "iterative_refinement_support_size": 55.0,
+      "oracle_nrmse": 2.0376202430681093e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 55.0,
+      "gain_iterative_vs_cosamp": 0.4088706052029659,
+      "gain_iterative_vs_block_score": 0.3474925702816203,
+      "gain_iterative_vs_learned": 0.3588381546553874
+    },
+    {
+      "setting": "m=96,k=55",
+      "seed": "seed1",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k55_seed1_iter1.json",
+      "k": 55,
+      "m": 96,
+      "refine_iters": 1,
+      "naive_nrmse": 0.9224433480620795,
+      "naive_iou": 0.28371990607887637,
+      "naive_support_size": 55.0,
+      "cosamp_nrmse": 0.8291696301231758,
+      "cosamp_iou": 0.35757915055266537,
+      "cosamp_support_size": 55.0,
+      "block_score_topk_nrmse": 0.7557862834880719,
+      "block_score_topk_iou": 0.5391439704086762,
+      "block_score_topk_support_size": 55.0,
+      "learned_block_scorer_nrmse": 0.775551164769772,
+      "learned_block_scorer_iou": 0.522975532093179,
+      "learned_block_scorer_support_size": 55.0,
+      "iterative_refinement_nrmse": 0.4389909456572451,
+      "iterative_refinement_iou": 0.7633592077856783,
+      "iterative_refinement_support_size": 55.0,
+      "oracle_nrmse": 2.046930965065975e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 55.0,
+      "gain_iterative_vs_cosamp": 0.3901786844659307,
+      "gain_iterative_vs_block_score": 0.31679533783082675,
+      "gain_iterative_vs_learned": 0.3365602191125269
+    },
+    {
+      "setting": "m=96,k=55",
+      "seed": "seed2",
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k55_seed2_iter1.json",
+      "k": 55,
+      "m": 96,
+      "refine_iters": 1,
+      "naive_nrmse": 0.9224344158216684,
+      "naive_iou": 0.2905019359693059,
+      "naive_support_size": 55.0,
+      "cosamp_nrmse": 0.8204243693307166,
+      "cosamp_iou": 0.3664078922359128,
+      "cosamp_support_size": 55.0,
+      "block_score_topk_nrmse": 0.7599845342323323,
+      "block_score_topk_iou": 0.5348558560176206,
+      "block_score_topk_support_size": 55.0,
+      "learned_block_scorer_nrmse": 0.7642107890032768,
+      "learned_block_scorer_iou": 0.5276505123416888,
+      "learned_block_scorer_support_size": 55.0,
+      "iterative_refinement_nrmse": 0.4280140114837737,
+      "iterative_refinement_iou": 0.7706031746031746,
+      "iterative_refinement_support_size": 55.0,
+      "oracle_nrmse": 1.9994510632278496e-15,
+      "oracle_iou": 1.0,
+      "oracle_support_size": 55.0,
+      "gain_iterative_vs_cosamp": 0.3924103578469429,
+      "gain_iterative_vs_block_score": 0.33197052274855854,
+      "gain_iterative_vs_learned": 0.33619677751950305
+    }
+  ],
+  "iteration_ablation_rows": [
+    {
+      "setting": "m=96,k=40",
+      "refine_iters": 1,
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k40_iter1.json",
+      "k": 40,
+      "m": 96,
+      "iterative_nrmse": 0.11140534627228983,
+      "iterative_iou": 0.9302222222222222,
+      "cosamp_nrmse": 0.6551764493071742,
+      "block_score_topk_nrmse": 0.5769219170708267,
+      "learned_block_scorer_nrmse": 0.5918468387806659,
+      "gain_iterative_vs_cosamp": 0.5437711030348844,
+      "gain_iterative_vs_block_score": 0.4655165707985369,
+      "gain_iterative_vs_learned": 0.4804414925083761
+    },
+    {
+      "setting": "m=96,k=40",
+      "refine_iters": 2,
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k40_iter2.json",
+      "k": 40,
+      "m": 96,
+      "iterative_nrmse": 0.2300015440126879,
+      "iterative_iou": 0.8615488215488214,
+      "cosamp_nrmse": 0.6551764493071742,
+      "block_score_topk_nrmse": 0.5769219170708267,
+      "learned_block_scorer_nrmse": 0.5918468387806659,
+      "gain_iterative_vs_cosamp": 0.4251749052944863,
+      "gain_iterative_vs_block_score": 0.34692037305813883,
+      "gain_iterative_vs_learned": 0.361845294767978
+    },
+    {
+      "setting": "m=96,k=40",
+      "refine_iters": 4,
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k40_iter4.json",
+      "k": 40,
+      "m": 96,
+      "iterative_nrmse": 0.22907723518263567,
+      "iterative_iou": 0.8630303030303029,
+      "cosamp_nrmse": 0.6551764493071742,
+      "block_score_topk_nrmse": 0.5769219170708267,
+      "learned_block_scorer_nrmse": 0.5918468387806659,
+      "gain_iterative_vs_cosamp": 0.42609921412453855,
+      "gain_iterative_vs_block_score": 0.34784468188819107,
+      "gain_iterative_vs_learned": 0.36276960359803023
+    },
+    {
+      "setting": "m=96,k=55",
+      "refine_iters": 1,
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k55_iter1.json",
+      "k": 55,
+      "m": 96,
+      "iterative_nrmse": 0.41769300922755637,
+      "iterative_iou": 0.767165230194642,
+      "cosamp_nrmse": 0.8265636144305223,
+      "block_score_topk_nrmse": 0.7651855795091766,
+      "learned_block_scorer_nrmse": 0.7765311638829437,
+      "gain_iterative_vs_cosamp": 0.4088706052029659,
+      "gain_iterative_vs_block_score": 0.3474925702816203,
+      "gain_iterative_vs_learned": 0.3588381546553874
+    },
+    {
+      "setting": "m=96,k=55",
+      "refine_iters": 2,
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k55_iter2.json",
+      "k": 55,
+      "m": 96,
+      "iterative_nrmse": 0.4904871217595007,
+      "iterative_iou": 0.7341430905695612,
+      "cosamp_nrmse": 0.8265636144305223,
+      "block_score_topk_nrmse": 0.7651855795091766,
+      "learned_block_scorer_nrmse": 0.7765311638829437,
+      "gain_iterative_vs_cosamp": 0.3360764926710216,
+      "gain_iterative_vs_block_score": 0.27469845774967594,
+      "gain_iterative_vs_learned": 0.28604404212344303
+    },
+    {
+      "setting": "m=96,k=55",
+      "refine_iters": 4,
+      "path": "/Users/taewoonchoi/Desktop/phase_2_sparse_recovery/results/iterative_learned_block_refinement/iterative_learned_block_refinement_m96_k55_iter4.json",
+      "k": 55,
+      "m": 96,
+      "iterative_nrmse": 0.4759304305833762,
+      "iterative_iou": 0.7447509157509157,
+      "cosamp_nrmse": 0.8265636144305223,
+      "block_score_topk_nrmse": 0.7651855795091766,
+      "learned_block_scorer_nrmse": 0.7765311638829437,
+      "gain_iterative_vs_cosamp": 0.3506331838471461,
+      "gain_iterative_vs_block_score": 0.28925514892580045,
+      "gain_iterative_vs_learned": 0.30060073329956755
+    }
+  ],
+  "setting_summary": {
+    "m=96,k=40": {
+      "n_seeds": 3,
+      "methods": {
+        "naive": {
+          "nrmse_mean": 0.827469699224484,
+          "nrmse_std_across_seeds": 0.002239721216329106,
+          "values": [
+            0.8300671670067405,
+            0.8277408053030395,
+            0.824601125363672
+          ]
+        },
+        "cosamp": {
+          "nrmse_mean": 0.6621717718609562,
+          "nrmse_std_across_seeds": 0.008499589512218556,
+          "values": [
+            0.6551764493071742,
+            0.6741348704916249,
+            0.6572039957840694
+          ]
+        },
+        "block_score_topk": {
+          "nrmse_mean": 0.5738974523956917,
+          "nrmse_std_across_seeds": 0.00729693827165708,
+          "values": [
+            0.5769219170708267,
+            0.5809296581486135,
+            0.5638407819676348
+          ]
+        },
+        "learned_block_scorer": {
+          "nrmse_mean": 0.5955562979841371,
+          "nrmse_std_across_seeds": 0.002869405396409595,
+          "values": [
+            0.5918468387806659,
+            0.5988358662808673,
+            0.5959861888908783
+          ]
+        },
+        "iterative_refinement": {
+          "nrmse_mean": 0.11202602263950834,
+          "nrmse_std_across_seeds": 0.0016239109950268776,
+          "values": [
+            0.11140534627228983,
+            0.11042149763870045,
+            0.11425122400753471
+          ]
+        },
+        "oracle": {
+          "nrmse_mean": 1.8764725316106893e-15,
+          "nrmse_std_across_seeds": 1.4407262941036567e-17,
+          "values": [
+            1.8561049700143078e-15,
+            1.887131353608625e-15,
+            1.886181271209135e-15
+          ]
+        }
+      },
+      "gains": {
+        "gain_iterative_vs_cosamp": {
+          "mean": 0.5501457492214478,
+          "std_across_seeds": 0.009599573767140214,
+          "values": [
+            0.5437711030348844,
+            0.5637133728529244,
+            0.5429527717765347
+          ]
+        },
+        "gain_iterative_vs_block_score": {
+          "mean": 0.4618714297561833,
+          "std_across_seeds": 0.008920473570136249,
+          "values": [
+            0.4655165707985369,
+            0.47050816050991306,
+            0.44958955796010003
+          ]
+        },
+        "gain_iterative_vs_learned": {
+          "mean": 0.48353027534462883,
+          "std_across_seeds": 0.0034937127529790462,
+          "values": [
+            0.4804414925083761,
+            0.4884143686421668,
+            0.48173496488334355
+          ]
+        }
+      }
+    },
+    "m=96,k=55": {
+      "n_seeds": 3,
+      "methods": {
+        "naive": {
+          "nrmse_mean": 0.9221798956815581,
+          "nrmse_std_across_seeds": 0.0003662800343331785,
+          "values": [
+            0.9216619231609268,
+            0.9224433480620795,
+            0.9224344158216684
+          ]
+        },
+        "cosamp": {
+          "nrmse_mean": 0.8253858712948049,
+          "nrmse_std_across_seeds": 0.0036660792637664965,
+          "values": [
+            0.8265636144305223,
+            0.8291696301231758,
+            0.8204243693307166
+          ]
+        },
+        "block_score_topk": {
+          "nrmse_mean": 0.760318799076527,
+          "nrmse_std_across_seeds": 0.003844519143112476,
+          "values": [
+            0.7651855795091766,
+            0.7557862834880719,
+            0.7599845342323323
+          ]
+        },
+        "learned_block_scorer": {
+          "nrmse_mean": 0.7720977058853308,
+          "nrmse_std_across_seeds": 0.005591224850530015,
+          "values": [
+            0.7765311638829437,
+            0.775551164769772,
+            0.7642107890032768
+          ]
+        },
+        "iterative_refinement": {
+          "nrmse_mean": 0.42823265545619177,
+          "nrmse_std_across_seeds": 0.008696220555726946,
+          "values": [
+            0.41769300922755637,
+            0.4389909456572451,
+            0.4280140114837737
+          ]
+        },
+        "oracle": {
+          "nrmse_mean": 2.0280007571206448e-15,
+          "nrmse_std_across_seeds": 2.054241388054818e-17,
+          "values": [
+            2.0376202430681093e-15,
+            2.046930965065975e-15,
+            1.9994510632278496e-15
+          ]
+        }
+      },
+      "gains": {
+        "gain_iterative_vs_cosamp": {
+          "mean": 0.3971532158386131,
+          "std_across_seeds": 0.008335386480012585,
+          "values": [
+            0.4088706052029659,
+            0.3901786844659307,
+            0.3924103578469429
+          ]
+        },
+        "gain_iterative_vs_block_score": {
+          "mean": 0.33208614362033523,
+          "std_across_seeds": 0.012532359346215318,
+          "values": [
+            0.3474925702816203,
+            0.31679533783082675,
+            0.33197052274855854
+          ]
+        },
+        "gain_iterative_vs_learned": {
+          "mean": 0.3438650504291392,
+          "std_across_seeds": 0.010588623142330798,
+          "values": [
+            0.3588381546553874,
+            0.3365602191125269,
+            0.33619677751950305
+          ]
+        }
+      }
+    }
+  },
+  "interpretation": "One-step learned block refinement is evaluated across available seeds. Positive gain values mean iterative_refinement has lower NRMSE than the baseline. The iteration ablation tests whether additional refinement steps help or cause drift."
+}
