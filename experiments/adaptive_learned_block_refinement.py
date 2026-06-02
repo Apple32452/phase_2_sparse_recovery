@@ -16,7 +16,7 @@ Main idea:
     2. Initialize support from learned block probabilities.
     3. Propose residual-based block refinements.
     4. Accept a refinement only if it improves an unsupervised score:
-           residual_norm + change_weight * support_change_penalty
+           residual_norm, with optional support-change regularization
     5. Stop automatically when no improvement is detected.
 
 Methods:
@@ -65,7 +65,7 @@ def parse_args():
     p.add_argument("--noise-std", type=float, default=0.0)
     p.add_argument("--max-iters", type=int, default=30)
     p.add_argument("--refine-iters", type=int, default=4)
-    p.add_argument("--change-weight", type=float, default=0.05)
+    p.add_argument("--change-weight", type=float, default=0.0)
     p.add_argument("--min-improvement", type=float, default=1e-4)
     p.add_argument(
         "--out-prefix",
@@ -592,7 +592,7 @@ def adaptive_learned_block_refinement(
     Adaptive learned block refinement.
 
     A candidate update is accepted only if it improves an unsupervised
-    residual-plus-stability score.
+    residual-based adaptive stopping, with optional stability regularization score.
     """
     current_support = learned_block_support(clf, A, y, k, block_size)
     learned_probs = learned_block_probs(clf, A, y, block_size)
