@@ -77,6 +77,7 @@ If using an existing environment, make sure these packages are installed:
 ```bash
 pip install numpy scipy matplotlib scikit-learn
 ```
+The sparsity level `k`, measurement noise, sensing operator, and compressibility level are varied to test when classical and learned recovery methods succeed or fail.
 
 ---
 
