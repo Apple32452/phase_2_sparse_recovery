@@ -1,848 +1,338 @@
-# Phase 2 Sparse Recovery
+````markdown
+# phase_2_sparse_recovery
 
-This repository contains diagnostic and learned sparse-recovery experiments for studying when learning helps compressed sensing / sparse recovery.
+This repository contains experiments for learned and adaptive sparse recovery above the classical phase-transition regime.
 
-The main goal is **not** to claim that learning always beats classical sparse-recovery algorithms. Instead, the project studies:
+The main research question is:
 
-1. when classical methods such as CoSaMP are already near oracle,
-2. when hard regimes still contain algorithmic headroom,
-3. when unknown sparsity (k) matters,
-4. when structured priors help,
-5. how learned priors can be inserted into an algorithmic recovery loop.
+> When classical sparse recovery methods such as CoSaMP fail, can learned structure help recover the correct support?
 
-The current strongest result is **one-step learned block refinement**, which combines learned block probabilities with a residual-based merge-refit-prune correction step. In hard block-sparse regimes, this method substantially improves over CoSaMP, hand-designed block-score top-(k), and one-shot learned block scoring.
+The current answer is:
+
+> One-shot learned support prediction is not enough, but learned structure combined with residual-based adaptive refinement gives large gains in hard block-sparse regimes.
 
 ---
 
-## Repository Structure
+## Main result
+
+The strongest method in the current branch is:
 
 ```text
-phase_2_sparse_recovery/
-├── experiments/
-│   ├── cosamp_stress_test.py
-│   ├── cosamp_vs_table1.py
-│   ├── diagnostic_structured.py
-│   ├── ceiling_study_small_n.py
-│   ├── aggregate_ceiling_study.py
-│   ├── unknown_k.py
-│   ├── structured_priors.py
-│   ├── aggregate_structured_priors.py
-│   ├── learned_structured_prior.py
-│   ├── learned_block_scorer.py
-│   ├── aggregate_learned_block_scorer.py
-│   ├── iterative_learned_block_refinement.py
-│   └── aggregate_iterative_block_refinement.py
-│
-├── results/
-│   ├── cosamp/
-│   ├── diagnostics/
-│   ├── ceiling/
-│   ├── unknown_k/
-│   ├── structured_priors/
-│   ├── learned_structured_prior/
-│   ├── learned_block_scorer/
-│   └── iterative_learned_block_refinement/
-│
-├── figures/
-│   ├── cosamp/
-│   ├── diagnostics/
-│   ├── ceiling/
-│   ├── unknown_k/
-│   ├── structured_priors/
-│   ├── learned_structured_prior/
-│   ├── learned_block_scorer/
-│   └── iterative_learned_block_refinement/
-│
-├── scripts/
-│   └── reproduce_cosamp.sh
-│
-└── README.md
+Residual-stop adaptive learned block refinement
+````
+
+At `n=256`, `m=96`, the final three-seed aggregate results are:
+
+| Setting     |              Method | NRMSE mean | NRMSE SE |   IoU mean |
+| ----------- | ------------------: | ---------: | -------: | ---------: |
+| `m=96,k=40` |              CoSaMP |     0.6635 |   0.0053 |     0.4509 |
+| `m=96,k=40` |    block_score_topk |     0.5787 |   0.0054 |     0.6110 |
+| `m=96,k=40` | one_step_refinement |     0.0948 |   0.0099 |     0.9377 |
+| `m=96,k=40` | adaptive_refinement | **0.0633** |   0.0039 | **0.9587** |
+| `m=96,k=55` |              CoSaMP |     0.8330 |   0.0030 |     0.3587 |
+| `m=96,k=55` |    block_score_topk |     0.7669 |   0.0007 |     0.5265 |
+| `m=96,k=55` | one_step_refinement |     0.4380 |   0.0064 |     0.7636 |
+| `m=96,k=55` | adaptive_refinement | **0.3844** |   0.0104 | **0.7970** |
+
+The final aggregate figure is:
+
+```text
+figures/adaptive_learned_block_refinement/aggregate_residual_stop_nrmse.png
+```
+
+The final aggregate JSON is:
+
+```text
+results/adaptive_learned_block_refinement/aggregate_residual_stop.json
 ```
 
 ---
 
-## Installation
+## Research story
 
-Create an environment with standard scientific Python packages.
+The project developed through the following stages.
 
-```bash
-conda create -n sparse-recovery python=3.11 -y
-conda activate sparse-recovery
+### 1. CoSaMP stress tests
 
-pip install numpy scipy matplotlib scikit-learn
-```
+We first tested classical sparse recovery across sparsity, noise, and approximate-sparsity regimes.
 
-If using an existing environment, make sure these packages are installed:
-
-```bash
-pip install numpy scipy matplotlib scikit-learn
-```
-The sparsity level `k`, measurement noise, sensing operator, and compressibility level are varied to test when classical and learned recovery methods succeed or fail.
-
----
-
-## Main Experimental Story
-
-The project currently supports the following refined research claim:
-
-> Learning does not universally beat classical sparse recovery. Corrected CoSaMP is very strong in easy strict-sparse regimes. However, hard structured regimes expose support-identification bottlenecks. In those regimes, learned priors become most useful when inserted into a residual-based merge-refit-prune recovery loop.
-
-The strongest current method is:
+Main conclusion:
 
 ```text
-one-step learned block refinement
+Below the phase transition, classical methods win.
+Above the phase transition, support identification becomes the bottleneck.
 ```
 
-This method:
-
-1. predicts active blocks using a learned block scorer,
-2. forms an initial block support,
-3. performs least-squares refitting,
-4. computes residual correlations,
-5. merges learned-prior blocks with residual-correlation blocks,
-6. refits on the merged candidate support,
-7. prunes back to the target sparsity (k).
-
----
-
-## Key Results
-
-### 1. Corrected CoSaMP baseline
-
-File:
-
-```text
-experiments/cosamp_stress_test.py
-```
-
-The CoSaMP implementation was corrected and rerun. After the fix, CoSaMP behaves as expected: it is near-oracle in easy strict-sparse regimes.
-
-This is important because it prevents an artificial learned advantage caused by an implementation issue.
-
-Run:
-
-```bash
-bash scripts/reproduce_cosamp.sh
-```
-
-Outputs:
-
-```text
-results/cosamp/cosamp_stress_test.json
-figures/cosamp/cosamp_stress_test.png
-```
-
-Main takeaway:
-
-```text
-Easy strict-sparse regimes are not enough to claim a learned advantage.
-Corrected CoSaMP is already very strong there.
-```
-
----
-
-### 2. CoSaMP vs Table 1 diagnostic
-
-File:
+Relevant files:
 
 ```text
 experiments/cosamp_vs_table1.py
-```
-
-This experiment confirms that below-transition strict-sparse recovery is not a good regime for claiming a learned advantage. CoSaMP achieves near-oracle recovery in the strict-sparse (k=25) setting.
-
-Run:
-
-```bash
-python experiments/cosamp_vs_table1.py
-```
-
-Output:
-
-```text
-results/cosamp/cosamp_vs_table1.json
-```
-
-Main takeaway:
-
-```text
-If CoSaMP is already near oracle, learned methods have little meaningful room to improve.
+experiments/diagnostic_structured.py
+results/cosamp/
+figures/cosamp/
+results/diagnostics/
+figures/diagnostics/
 ```
 
 ---
 
-### 3. Small-n ceiling study
+### 2. Small-n ceiling study
 
-Files:
+We then ran an exact-support search in small dimensions to test whether recovery failure is information-theoretic or algorithmic.
+
+Main conclusion:
+
+```text
+Exact L0 and oracle support can still recover perfectly in small settings,
+while greedy methods degrade. This suggests the failure is often algorithmic
+support-search failure, not pure information loss.
+```
+
+Relevant files:
 
 ```text
 experiments/ceiling_study_small_n.py
 experiments/aggregate_ceiling_study.py
-```
-
-This experiment tests whether hard sparse-recovery regimes are information-theoretically impossible or only algorithmically difficult. Since (n) is small, exact (L_0) search is feasible.
-
-Methods compared:
-
-```text
-naive top-k correlation
-OMP
-CoSaMP
-HTP
-exact L0 search
-oracle support + least squares
-```
-
-Main finding:
-
-```text
-Exact L0 remains near oracle while greedy methods degrade as sparsity increases.
-```
-
-This suggests that some hard regimes are not immediately information-theoretically impossible. They still contain algorithmic headroom.
-
-Run:
-
-```bash
-python experiments/ceiling_study_small_n.py
-python experiments/aggregate_ceiling_study.py
-```
-
-Outputs:
-
-```text
 results/ceiling/
 figures/ceiling/
 ```
 
-Main takeaway:
-
-```text
-The hard region contains recoverable information, but standard greedy methods fail to find the correct support.
-```
-
 ---
 
-### 4. Unknown-k recovery
+### 3. Unknown-k recovery
 
-File:
+Classical sparse recovery usually assumes the true sparsity level `k` is known.
 
-```text
-experiments/unknown_k.py
-```
-
-This experiment tests recovery when the true sparsity (k) is unknown.
-
-Methods compared:
+Main conclusion:
 
 ```text
-CoSaMP with true k
-CoSaMP with fixed k
-OMP with residual stopping
-learned-k predictor + CoSaMP
+Fixed-k methods are fragile when the true sparsity varies.
+This motivates learned or adaptive cardinality mechanisms.
 ```
 
-Main finding:
+Relevant files:
 
 ```text
-Learned-k CoSaMP improves over poor fixed-k and residual-stopping baselines,
-but it does not beat oracle-k CoSaMP.
-```
-
-Run:
-
-```bash
-python experiments/unknown_k.py
-```
-
-Outputs:
-
-```text
+experiments/unknown_k_recovery.py
 results/unknown_k/
 figures/unknown_k/
 ```
 
-Main takeaway:
-
-```text
-Cardinality estimation helps, but support selection remains the main bottleneck.
-```
-
 ---
 
-### 5. Structured-prior experiments
+### 4. Structured-prior experiments
 
-Files:
+We tested whether one-shot structured heuristics can beat CoSaMP on block-sparse, cluster-sparse, and Markov-sparse signals.
+
+Main conclusion:
+
+```text
+Structured priors help when the assumed structure matches the signal,
+but one-shot structured support prediction is not reliable enough.
+```
+
+Relevant files:
 
 ```text
 experiments/structured_priors.py
-experiments/aggregate_structured_priors.py
-```
-
-This experiment tests whether support structure creates regimes where prior-aware recovery can outperform generic sparse-recovery algorithms.
-
-Signal families:
-
-```text
-iid_sparse
-block_sparse
-cluster_sparse
-markov_sparse
-```
-
-Methods compared:
-
-```text
-naive top-k correlation
-OMP
-CoSaMP
-HTP
-smoothed_topk
-block_score_topk
-oracle support + least squares
-```
-
-Main finding:
-
-```text
-Structured priors matter most in harder regimes.
-The clearest gain appears for block-sparse signals.
-```
-
-In hard regimes such as (m=96), `block_score_topk` can outperform CoSaMP on block-sparse signals.
-
-Run examples:
-
-```bash
-python experiments/structured_priors.py \
-  --m 96 \
-  --k 40 \
-  --n-test 200 \
-  --out-prefix structured_priors_m96_k40
-
-python experiments/structured_priors.py \
-  --m 96 \
-  --k 55 \
-  --n-test 200 \
-  --out-prefix structured_priors_m96_k55
-
-python experiments/aggregate_structured_priors.py
-```
-
-Outputs:
-
-```text
+experiments/aggregate_structured_prior.py
 results/structured_priors/
 figures/structured_priors/
 ```
 
-Main takeaway:
-
-```text
-Structured priors create measurable algorithmic headroom, especially for block-sparse recovery.
-```
-
 ---
 
-### 6. Learned structured-prior detector
+### 5. Learned block scorer
 
-File:
+We trained a learned block scorer and compared it against CoSaMP and block-score top-k.
 
-```text
-experiments/learned_structured_prior.py
-```
-
-This experiment trains a coordinate-level local/context detector using features from:
+Main conclusion:
 
 ```text
-|A^T y|
-local correlation windows
-block-level pooled features
-coherence features
-measurement norm features
+Learning block scores helps, but one-shot learned support prediction
+does not consistently beat structured heuristics or iterative refinement.
 ```
 
-Methods compared:
-
-```text
-naive top-k
-CoSaMP
-smoothed_topk
-block_score_topk
-learned_structured
-oracle
-```
-
-Main finding:
-
-```text
-The learned coordinate-level detector improves over some naive heuristics,
-but it does not consistently beat CoSaMP.
-```
-
-Run:
-
-```bash
-python experiments/learned_structured_prior.py \
-  --m 96 \
-  --k 40 \
-  --n-train-per-family 400 \
-  --n-test-per-family 200 \
-  --out-prefix learned_structured_prior_m96_k40
-```
-
-Outputs:
-
-```text
-results/learned_structured_prior/
-figures/learned_structured_prior/
-```
-
-Main takeaway:
-
-```text
-One-shot coordinate-wise learning is not enough.
-A learned sparse-recovery method needs set-level or block-level structure.
-```
-
----
-
-### 7. Learned block scorer
-
-Files:
+Relevant files:
 
 ```text
 experiments/learned_block_scorer.py
 experiments/aggregate_learned_block_scorer.py
-```
-
-This experiment focuses on block-sparse recovery, where structured-prior experiments showed the clearest headroom.
-
-The learned block scorer predicts active blocks first, then selects coordinates inside the highest-probability blocks.
-
-Methods compared:
-
-```text
-naive top-k
-CoSaMP
-block_score_topk
-learned_block_scorer
-oracle
-```
-
-Main finding:
-
-```text
-The learned block scorer improves over CoSaMP in hard block-sparse regimes,
-but it remains slightly weaker than the hand-designed block_score_topk baseline.
-```
-
-Run:
-
-```bash
-python experiments/learned_block_scorer.py \
-  --m 96 \
-  --k 40 \
-  --n-train 1000 \
-  --n-test 300 \
-  --out-prefix learned_block_scorer_m96_k40_fixed
-
-python experiments/learned_block_scorer.py \
-  --m 96 \
-  --k 55 \
-  --n-train 1000 \
-  --n-test 300 \
-  --out-prefix learned_block_scorer_m96_k55_fixed
-
-python experiments/aggregate_learned_block_scorer.py
-```
-
-Outputs:
-
-```text
 results/learned_block_scorer/
 figures/learned_block_scorer/
 ```
 
-Main takeaway:
-
-```text
-Block-level learning helps, but one-shot learned block scoring is still limited.
-```
-
 ---
 
-### 8. One-step learned block refinement
+### 6. Iterative learned block refinement
 
-Files:
+We then inserted learned block information into a residual-refinement loop.
+
+Main conclusion:
+
+```text
+Iterative refinement is much stronger than one-shot support prediction,
+but fixed iteration counts can over-refine and hurt performance.
+```
+
+Relevant files:
 
 ```text
 experiments/iterative_learned_block_refinement.py
-experiments/aggregate_iterative_block_refinement.py
-```
-
-This is the strongest current result.
-
-The method starts from learned block probabilities, then performs one residual-based refinement step:
-
-```text
-learned block prior
-+ least-squares refit
-+ residual correlation
-+ merge candidate blocks
-+ prune back to k
-```
-
-Methods compared:
-
-```text
-naive top-k
-CoSaMP
-block_score_topk
-learned_block_scorer
-iterative_refinement
-oracle
-```
-
-Although the script name uses `iterative`, the current best method should be interpreted as:
-
-```text
-one-step learned block refinement
-```
-
-because the ablation shows that one refinement step is best.
-
-Run main experiments:
-
-```bash
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 40 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k40_iter1
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 55 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k55_iter1
-```
-
-Run additional seeds:
-
-```bash
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 40 \
-  --n-train 1000 \
-  --n-test 300 \
-  --seed 1 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k40_seed1_iter1
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 55 \
-  --n-train 1000 \
-  --n-test 300 \
-  --seed 1 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k55_seed1_iter1
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 40 \
-  --n-train 1000 \
-  --n-test 300 \
-  --seed 2 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k40_seed2_iter1
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 55 \
-  --n-train 1000 \
-  --n-test 300 \
-  --seed 2 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k55_seed2_iter1
-```
-
-Run iteration ablation:
-
-```bash
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 40 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k40_iter1
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 40 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 2 \
-  --out-prefix iterative_learned_block_refinement_m96_k40_iter2
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 40 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 4 \
-  --out-prefix iterative_learned_block_refinement_m96_k40_iter4
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 55 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 1 \
-  --out-prefix iterative_learned_block_refinement_m96_k55_iter1
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 55 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 2 \
-  --out-prefix iterative_learned_block_refinement_m96_k55_iter2
-
-python experiments/iterative_learned_block_refinement.py \
-  --m 96 \
-  --k 55 \
-  --n-train 1000 \
-  --n-test 300 \
-  --refine-iters 4 \
-  --out-prefix iterative_learned_block_refinement_m96_k55_iter4
-```
-
-Aggregate:
-
-```bash
-python experiments/aggregate_iterative_block_refinement.py
-```
-
-Outputs:
-
-```text
 results/iterative_learned_block_refinement/
 figures/iterative_learned_block_refinement/
 ```
 
-Important aggregate figures:
+---
+
+### 7. Adaptive learned block refinement
+
+The final method uses residual-based adaptive stopping.
+
+Main conclusion:
 
 ```text
-figures/iterative_learned_block_refinement/aggregate_iterative_block_refinement_seed_summary.png
-figures/iterative_learned_block_refinement/aggregate_iterative_block_refinement_gains.png
-figures/iterative_learned_block_refinement/aggregate_iterative_block_refinement_iter_ablation.png
+Adaptive refinement keeps useful correction steps and rejects harmful ones.
+This gives the strongest practical recovery in the main hard regimes.
 ```
 
-Main finding:
+Relevant files:
 
 ```text
-One-step learned block refinement is the strongest non-oracle method.
-It beats CoSaMP, block_score_topk, and learned_block_scorer in hard block-sparse regimes.
-```
-
-Approximate aggregate summary:
-
-```text
-m=96, k=40:
-CoSaMP                 ≈ 0.66 NRMSE
-block_score_topk       ≈ 0.57 NRMSE
-learned_block_scorer   ≈ 0.60 NRMSE
-one-step refinement    ≈ 0.11 NRMSE
-
-m=96, k=55:
-CoSaMP                 ≈ 0.83 NRMSE
-block_score_topk       ≈ 0.76 NRMSE
-learned_block_scorer   ≈ 0.77 NRMSE
-one-step refinement    ≈ 0.43 NRMSE
-```
-
-Approximate gains:
-
-```text
-m=96, k=40:
-one-step refinement vs CoSaMP       ≈ +0.550 NRMSE gain
-one-step refinement vs block_score  ≈ +0.462 NRMSE gain
-one-step refinement vs learned      ≈ +0.484 NRMSE gain
-
-m=96, k=55:
-one-step refinement vs CoSaMP       ≈ +0.397 NRMSE gain
-one-step refinement vs block_score  ≈ +0.332 NRMSE gain
-one-step refinement vs learned      ≈ +0.344 NRMSE gain
-```
-
-Iteration ablation:
-
-```text
-One refinement step is best.
-Additional refinement steps can degrade performance, likely because residual updates drift away from the true block support.
-```
-
-Main takeaway:
-
-```text
-Learning is most effective when used as a structured prior inside a merge-refit-prune recovery loop, not as a standalone support classifier.
+experiments/adaptive_learned_block_refinement.py
+experiments/adaptive_phase_diagram.py
+experiments/adaptive_stopping_ablation.py
+experiments/aggregate_residual_stop.py
+results/adaptive_learned_block_refinement/
+figures/adaptive_learned_block_refinement/
 ```
 
 ---
 
-## Current Best Paper Claim
+## Reproducing the final aggregate result
 
-The most defensible paper claim is:
-
-```text
-Learning does not universally beat classical sparse recovery.
-Corrected CoSaMP is already near-oracle in easy strict-sparse regimes.
-
-However, hard structured regimes expose support-identification bottlenecks.
-In those regimes, learned priors are most useful when inserted into an algorithmic recovery loop.
-
-One-step learned block refinement combines learned block probabilities with residual-based correction and substantially improves over CoSaMP, block_score_topk, and one-shot learned block scoring in hard block-sparse regimes.
-```
-
----
-
-## Recommended Paper Figures
-
-For the final report or paper, the most important figures are:
-
-```text
-1. CoSaMP stress test after correction
-2. Small-n ceiling study aggregate
-3. Unknown-k recovery
-4. Structured-prior aggregate heatmap
-5. Learned block scorer aggregate
-6. One-step learned block refinement seed summary
-7. One-step learned block refinement gains
-8. Refinement iteration ablation
-```
-
-Most important current figures:
-
-```text
-figures/iterative_learned_block_refinement/aggregate_iterative_block_refinement_seed_summary.png
-figures/iterative_learned_block_refinement/aggregate_iterative_block_refinement_gains.png
-figures/iterative_learned_block_refinement/aggregate_iterative_block_refinement_iter_ablation.png
-```
-
-For paper-ready plotting, prefer:
-
-```text
-mean ± standard error
-boxplots
-or clipped lower error bars
-```
-
-instead of full mean ± standard deviation, because NRMSE is nonnegative and standard-deviation error bars may visually extend below zero.
-
----
-
-## Reproducibility Notes
-
-Most experiments write results to:
-
-```text
-results/<experiment_name>/
-```
-
-and figures to:
-
-```text
-figures/<experiment_name>/
-```
-
-The JSON files contain:
-
-```text
-configuration
-method list
-mean NRMSE
-standard deviation
-median
-IoU
-support-size diagnostics
-```
-
-Use the aggregate scripts to generate paper-ready summaries.
-
----
-
-## Development Notes
-
-After running experiments, commit results with:
+Run:
 
 ```bash
-git add experiments/
-git add results/
-git add figures/
-
-git commit -m "Add new sparse recovery experiment results"
-git push origin cleanup/repo-structure
+python experiments/aggregate_residual_stop.py
 ```
 
-If GitHub rejects the push because the remote branch has new commits:
+Expected output includes:
+
+```text
+Aggregate residual-stop results
+-----------------------------------------------------------------------------------------------
+setting      method                         NRMSE mean   NRMSE SE   IoU mean
+m96_k40      naive                              0.8289     0.0009     0.2886
+m96_k40      cosamp                             0.6635     0.0053     0.4509
+m96_k40      block_score_topk                   0.5787     0.0054     0.6110
+m96_k40      learned_block_scorer               0.5829     0.0073     0.6069
+m96_k40      one_step_refinement                0.0948     0.0099     0.9377
+m96_k40      fixed_iterative_refinement         0.2215     0.0066     0.8680
+m96_k40      adaptive_refinement                0.0633     0.0039     0.9587
+m96_k40      oracle                             0.0000     0.0000     1.0000
+m96_k55      naive                              0.9257     0.0029     0.2839
+m96_k55      cosamp                             0.8330     0.0030     0.3587
+m96_k55      block_score_topk                   0.7669     0.0007     0.5265
+m96_k55      learned_block_scorer               0.7776     0.0047     0.5182
+m96_k55      one_step_refinement                0.4380     0.0064     0.7636
+m96_k55      fixed_iterative_refinement         0.4563     0.0082     0.7597
+m96_k55      adaptive_refinement                0.3844     0.0104     0.7970
+m96_k55      oracle                             0.0000     0.0000     1.0000
+```
+
+This writes:
+
+```text
+results/adaptive_learned_block_refinement/aggregate_residual_stop.json
+figures/adaptive_learned_block_refinement/aggregate_residual_stop_nrmse.png
+```
+
+---
+
+## Recommended branch workflow
+
+Current development branch:
+
+```text
+cleanup/repo-structure
+```
+
+Update the README on this branch first:
 
 ```bash
-git fetch origin
+git checkout cleanup/repo-structure
 git pull --rebase origin cleanup/repo-structure
+
+git add README.md
+git commit -m "Update README with adaptive refinement results"
 git push origin cleanup/repo-structure
 ```
 
----
+After the report and README are stable, merge into `main`:
 
-## Next Steps
-
-The current priority is no longer adding many unrelated experiments. The next steps should be:
-
-```text
-1. Clean paper-ready figures.
-2. Update the Overleaf paper with the one-step learned block refinement method.
-3. Add an algorithm box for one-step learned block refinement.
-4. Add a table reporting aggregate gains over CoSaMP and block_score_topk.
-5. Add the iteration ablation showing that one step is best.
-6. Test a few more regimes or seeds only if needed.
-7. Compare against stronger structured sparse-recovery baselines if time allows.
+```bash
+git checkout main
+git pull origin main
+git merge cleanup/repo-structure
+git push origin main
 ```
 
-Possible method improvements:
+Alternative recommended workflow:
 
 ```text
-adaptive stopping rule for refinement
-residual-drift detection
-stronger learned block aggregator
-extension to cluster-sparse and Markov-sparse supports
+Open a pull request from cleanup/repo-structure into main.
 ```
+
+Do not manually edit both branches separately. Keep `cleanup/repo-structure` as the source of truth until the paper/report version is finalized.
 
 ---
 
-## Summary
+## Report
 
-This repository has evolved from a basic learned sparse-recovery comparison into a diagnostic study of **when learning helps sparse recovery**.
+The current report draft is written in an ICML-style Overleaf format.
 
-The current conclusion is:
+Recommended Overleaf files:
 
 ```text
-Easy strict-sparse regimes: classical methods are strong.
-Hard unstructured regimes: support selection is difficult.
-Unknown k: learned cardinality helps but is insufficient.
-Structured priors: block structure creates recoverable headroom.
-One-shot learned support scoring: useful but limited.
-One-step learned block refinement: strongest current non-oracle method.
+main.tex
+figures/stress_test.png
+figures/alpha_trajectories.png
+figures/adaptive_learned_block_refinement/aggregate_residual_stop_nrmse.png
+figures/adaptive_learned_block_refinement/adaptive_phase_diagram_smoke_adaptive_nrmse.png
+figures/adaptive_learned_block_refinement/adaptive_phase_diagram_smoke_gain_cosamp.png
+figures/adaptive_learned_block_refinement/adaptive_phase_diagram_smoke_gain_block.png
+figures/adaptive_learned_block_refinement/adaptive_phase_diagram_smoke_steps.png
+figures/adaptive_learned_block_refinement/adaptive_stopping_ablation_gain_cosamp.png
+figures/adaptive_learned_block_refinement/adaptive_stopping_ablation_nrmse_by_weight.png
 ```
 
-The strongest experimental result is:
+---
+
+## Current paper-level claim
+
+The cleanest claim supported by the experiments is:
 
 ```text
-One-step learned block refinement substantially improves over CoSaMP, block_score_topk, and learned_block_scorer in hard block-sparse regimes.
+Classical sparse recovery fails mainly through support-identification errors.
+One-shot learned support prediction helps but is insufficient.
+Residual-based adaptive learned block refinement gives large gains by combining
+learned structured proposals with residual-driven acceptance.
+```
+
+---
+
+## Status
+
+The exploration stage is mostly complete.
+
+Remaining work:
+
+1. Polish the Overleaf report.
+2. Make sure all figure filenames match the LaTeX.
+3. Update README on `cleanup/repo-structure`.
+4. Push and open a pull request into `main`.
+5. Add more seeds only if needed for a formal conference submission.
+
+```
 ```
